@@ -1,0 +1,19 @@
+{
+  "name": "SimpleStore",
+  "version": "1.0.0",
+  "description": "A cloud storage application",
+  "main": "js/main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": "https://github.com/BenLorantfy/SOA-A5/tree/master/client/ux/prototype",
+  "keywords": [
+    "Cloud Storage Application"
+  ],
+  "author": "BenLorantfy",
+  "license": "MIT",
+  "devDependencies": {
+     "electron": "^1.4.1"
+    ,"jszip":">0.0.0"
+  }
+}

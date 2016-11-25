@@ -1,0 +1,16 @@
+{
+  "name": "TrillumBeaconBeaconServer",
+  "repository": "https://github.com/BenLorantfy/TrillumBeacon",
+  "description": "TrillumBeacon",
+  "version": "0.0.0",
+  "dependencies": {
+    "bcrypt-nodejs": "0.0.3",
+    "knex": "^0.12.6",
+    "mysql": "^2.12.0",
+    "socket.io": "^1.6.0"
+  },
+  "scripts": {
+    "start": "node app"
+  },
+  "main": "app.js"
+}

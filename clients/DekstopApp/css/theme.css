@@ -1,0 +1,264 @@
+html,body{
+    position: absolute;
+    top:0;
+    left:0;
+    width: 100%;
+    height: 100%;
+    
+    padding:0;
+    margin:0;
+    
+    background-color:#F2F2F2;
+    font-family: Helvetica, Arial, sans-serif;
+    overflow:hidden;
+    font-weight: 100;
+}
+
+::-webkit-input-placeholder{
+    font-weight: 100;
+}
+
+h2{
+    padding:0;
+    margin:0;
+    font-size:16px;
+    color:white;
+    font-weight: 100;
+}
+
+*{
+    box-sizing: border-box;
+}
+
+section{
+    position: fixed;
+    left: 0;
+    z-index: 0;
+    top:0;
+    left:0;
+    width:100%;
+    height: 100%;
+}
+
+#map{
+    position: absolute;
+    top:0;
+    left: 0;
+    width:100%;
+    height: 100%;
+}
+
+#loginScreen:before {
+    content: "";
+    position: fixed;
+    left: 0;
+    right: 0;
+    z-index: -1;
+
+    display: block;
+    background-image: url('../img/background.png');
+    width: 1200px;
+    height: 800px;
+
+    -webkit-filter: blur(5px);
+    -moz-filter: blur(5px);
+    -o-filter: blur(5px);
+    -ms-filter: blur(5px);
+    filter: blur(5px);
+}
+
+#logo{
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top:20%;
+    width:60%;
+}
+
+input[type="text"],input[type="password"]{
+    display: block;
+    border:none;
+    background-color:rgba(255,255,255,0.5);
+    padding:10px;
+    font-size:19px;
+    margin-left: auto;
+    margin-right:auto;
+    margin-top:15px;
+    outline-color: #7DC6FF;
+}
+
+input[type="button"],button{
+    display: block;
+    border:none;
+    outline:none;
+    margin-left:auto;
+    margin-right:auto;
+    margin-top:20px;
+    font-size:18px;
+    
+    background-color:#D13026;
+    opacity: 0.8;
+    color:white;
+    padding:10px;
+    min-width: 120px;
+    border-radius: 20px;
+    
+    cursor: pointer;
+}
+
+#signUpMessage{
+    width:100%;
+    text-align: center;
+    margin-top:20px;
+    color:grey;
+    font-size:14px;
+}
+
+#signUp{
+    color:#FA654F;
+}
+
+#fileColumnHolder{
+    height: 100%;
+    background-color:white;
+    white-space: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    width:100%;
+}
+
+#fileColumnHolder::after{
+    content:"";
+    width: 200px;
+    height: 100%;
+    display: inline-block;
+    vertical-align: top;
+}
+
+.fileColumnHolder{
+    height: 100%;
+    display: inline-block;
+    vertical-align: top;
+}
+
+.fileColumn{
+    width:250px;
+/*    border-right:1px solid #B4BBBF;*/
+    border-right:1px solid #E5E5E5;
+    height: 100%;
+    padding:20px;
+    color:grey;
+    display: inline-block;
+    vertical-align: top;
+    background-color:#F2F2F2;
+	overflow: scroll;
+}
+
+.fileColumnHeader{
+    color:#B5B2B7;
+    font-size: 20px;
+    margin-bottom:10px;
+}
+
+.hide{
+    display: none;
+}
+
+.destructive, input[type="button"].destructive{
+    background-color:red;
+}
+
+#tools{
+    width:200px;
+    position: absolute;
+    top:0;
+    right:0;
+    height: 100%;
+    background-color:rgba(40,145,255,0.4);
+    border-left:1px solid rgba(40,145,255,0.6);
+    text-align: center;
+}
+
+#selectionTools{
+    width:100%;
+    border-bottom:1px solid rgba(40,145,255,0.6);
+    padding-bottom:20px;
+    display: none;
+    padding-top:10px;
+}
+
+/*
+#universalTools{
+    width:100%;
+    padding-bottom:20px;
+    padding-top:10px;    
+}
+*/
+
+#universalTools [type="button"]{
+    width:140px;
+    margin-bottom: 10px;
+}
+
+#selectionTools [type="button"]{
+    font-size:13px;
+    padding:4px;
+    min-width: 80px;
+    display: inline-block;
+    margin-top:10px;
+    border-radius: 15px;
+}
+
+#selectedFilesHolder{
+    margin-top:10px;
+}
+
+.selectedFile{
+    padding:5px;
+    background-color:rgba(255,255,255,0.5);
+    border-radius: 10px;
+    font-size:15px;
+    color:grey;
+    text-align: left;
+    width:85%;
+    display: block;
+    margin-left:auto;
+    margin-right: auto;
+/*    border:1px solid rgba(0,0,0,0.2);*/
+    margin-top:5px;
+    padding-left:10px;	
+	overflow:hidden;
+}
+
+.selectedFile .folder{
+    width:18px;
+    vertical-align: middle;
+    margin-right:5px;
+/*    margin-top:-1px;*/
+}
+
+.selectedFileName{
+    vertical-align: middle;
+}
+
+#signUpMessage,#logInMessage{
+    width:100%;
+    text-align: center;
+    margin-top:20px;
+    color:grey;
+    font-size:14px;
+}
+
+#openSignUp,#openLogIn{
+    color:#D13026;
+    opacity: 0.8;
+    cursor: pointer;
+}
+
+.extraFieldContainer{
+    display: none;
+}
+
+#signupUI{
+    display: none;
+}
