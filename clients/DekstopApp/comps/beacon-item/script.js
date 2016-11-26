@@ -5,13 +5,12 @@
         return {
             restrict: 'E',
             scope: {
-                 "name": '@'
-                ,"isFolder": '@'
+                 "lat": '@'
+                ,"lng": '@'
             },
-            "transclude": true,
             templateUrl: 'comps/' + hyphenCase + '/markup.html',
         };
     });    
     
-})("treeItem");
+})("beaconItem");
 

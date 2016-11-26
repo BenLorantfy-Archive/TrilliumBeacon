@@ -34,8 +34,28 @@ app.controller('MainController', function($scope, $compile) {
                 });
 
                 markers.push(marker);
+                
+                addBeaconToList(beacon);
             })
         })
+    }
+    
+    function addBeaconToList(beacon){
+        if($("#" + beacon.long_id).length > 0){
+            var el = $("#" + beacon.long_id);
+        }else{
+            var el  = $("<beacon-item></beacon-item>");
+            el.attr("id",beacon.long_id);   
+            $("#beacons").append(el);
+            $compile(el)($scope);
+        }
+
+        el.find(".lat").text(beacon.lat);
+        el.find(".lng").text(beacon.lng);
+
+        
+
+
     }
 
 
@@ -110,7 +130,7 @@ app.controller('MainController', function($scope, $compile) {
 // - App loads faster
 (function(){
 	var comps = [
-		 "tree-item"
+		 "beacon-item"
 	];
 
 	$.each(comps,function(i,name){

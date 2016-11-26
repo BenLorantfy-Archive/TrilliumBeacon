@@ -75,6 +75,16 @@ section{
     width:60%;
 }
 
+#beacons{
+    position: fixed;
+    z-index: 3;
+    top:0;
+    right:0;
+    height: 100%;
+    background-color:rgba(255,255,255,0.5);
+    width: 200px;
+}
+
 input[type="text"],input[type="password"]{
     display: block;
     border:none;
@@ -116,48 +126,6 @@ input[type="button"],button{
 
 #signUp{
     color:#FA654F;
-}
-
-#fileColumnHolder{
-    height: 100%;
-    background-color:white;
-    white-space: nowrap;
-    overflow-x: auto;
-    overflow-y: hidden;
-    width:100%;
-}
-
-#fileColumnHolder::after{
-    content:"";
-    width: 200px;
-    height: 100%;
-    display: inline-block;
-    vertical-align: top;
-}
-
-.fileColumnHolder{
-    height: 100%;
-    display: inline-block;
-    vertical-align: top;
-}
-
-.fileColumn{
-    width:250px;
-/*    border-right:1px solid #B4BBBF;*/
-    border-right:1px solid #E5E5E5;
-    height: 100%;
-    padding:20px;
-    color:grey;
-    display: inline-block;
-    vertical-align: top;
-    background-color:#F2F2F2;
-	overflow: scroll;
-}
-
-.fileColumnHeader{
-    color:#B5B2B7;
-    font-size: 20px;
-    margin-bottom:10px;
 }
 
 .hide{
