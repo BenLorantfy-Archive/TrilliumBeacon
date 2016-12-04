@@ -25,11 +25,36 @@ app.controller('MainController', function($scope, $compile) {
 
             // [ Add all the new markers]
             $.each(beacons,function(i,beacon){
+                var icon = "";
+                if(beacon.water){
+                    icon += "-water";
+                }
+                if(beacon.food){
+                    icon += "-food";
+                }
+                if(beacon.clothing){
+                    icon += "-clothing";
+                }
+                if(!beacon.water && !beacon.food && !beacon.clothing){
+                    icon = "blank";
+                }else{
+                    icon = icon.substr(1);
+                }
+                
+                icon = "img/pins/" + icon + ".png";
+                
+                
+                
                 var marker = new google.maps.Marker({
                     position: {
-                        lat:beacon.lat
+                         lat:beacon.lat
                         ,lng:beacon.lng
                     },
+                    icon:{
+                         url:icon
+                        ,scaledSize:new google.maps.Size(25,30)
+                    },
+                    
                     map: map
                 });
 

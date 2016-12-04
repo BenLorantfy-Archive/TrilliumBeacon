@@ -65,6 +65,27 @@ socket.on('connect', function(data) {
 		})
 		setTimeout(function(){ send(socket); },Math.random() * 5000);
 	})(socket);
+    
+    // [ Send the signal type ]
+    var signal = getRandomSignal();
+    socket.emit("signal",{
+        "type":signal
+        ,key:key
+        ,id:id
+        ,date:(new Date()).toISOString()        
+    })
 
 	console.log('Connected to server at port 4000');
 });
+
+function getRandomSignal(){
+    var signals = ["water","food","clothing"];
+    var signal = signals[
+        (function() {
+          min = Math.ceil(0);
+          max = Math.floor(signals.length - 1);
+          return Math.floor(Math.random() * (max - min + 1)) + min;
+        })()
+    ]
+    return signal;
+}

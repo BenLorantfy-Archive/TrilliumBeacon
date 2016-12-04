@@ -20,41 +20,74 @@ var server = http.createServer(function(req, res)
 server.listen(4000);
 io = io.listen(server);
 
-var recievedFirstMessage = false;
+var recieving = false;
 
 // Add a connect listener
-io.sockets.on('connection', function(socket)
-{
-  console.log('Client connected.');
+io.sockets.on('connection', function(socket){
+    console.log('Client connected.');
 
-  socket.on('movement', function(data) {
-  	if(!recievedFirstMessage){
-  		console.log("Verified recieving data...")
-  	}
-  	recievedFirstMessage = true;
+    socket.on('movement', function(data) {
+        verifyRecieving();
 
+        getBeacon(data.id,data.key,function(id){
+          db("Beacon").where("id",id).update({
+             lat:data.lat
+            ,lng:data.lng
+            ,time_of_last_location:data.date
+          }).then();
+        });
+    });
+    
+    socket.on("signal",function(data){
+        verifyRecieving();
+        
+        getBeacon(data.id,data.key,function(id){
+            var query = db("Beacon").where("id",id);
+            
+            if(data.type == "water"){
+                query.update({
+                    water:1
+                });
+            }else if(data.type == "food"){
+                query.update({
+                    food:1
+                });           
+            }else if(data.type == "clothing"){
+                query.update({
+                    clothing:1
+                });                  
+            }
+            
+            query.then();           
+        });        
+    });
+    
+    function verifyRecieving(){
+        if(!recieving){
+            console.log("Verified recieving data...")
+        }
+        recieving = true;        
+    }
+    
+    function getBeacon(id,key,callback){
+        db.select("id","key_hash").from("Beacon").where("long_id",id).then(function(rows){
+            if(!rows[0]){
+                console.log("A beacon with id = " + id + " wasn't found");
+                return;
+            }
+            var row = rows[0];
 
-  	db.select("id","key_hash").from("Beacon").where("long_id",data.id).then(function(rows){
-  		if(!rows[0]){
-  			console.log("A beacon with id = " + data.id + " wasn't found");
-  			return;
-  		}
-  		var row = rows[0];
-
-  		if(bcrypt.compareSync(data.key, row.key_hash)){
-  			db("Beacon").where("id",row.id).update({
-  				 lat:data.lat
-  				,lng:data.lng
-  				,time_of_last_location:data.date
-  			}).then();
-  		}else{
-  			console.log("Key doesn't match hash");
-  		}
-  	})
-  	// console.log(row);
-  	//db.insert({ lat:data.lat, lng:data.lng})
-  	// console.log(data);
-  });
+            if(bcrypt.compareSync(key, row.key_hash)){
+                
+                if(typeof callback === "function"){
+                    callback(row.id);
+                }
+                
+            }else{
+                console.log("Key doesn't match hash");
+            }
+        })         
+    }
 
   // Disconnect listener
   socket.on('disconnect', function() {

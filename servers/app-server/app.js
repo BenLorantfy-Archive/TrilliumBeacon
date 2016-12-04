@@ -21,8 +21,7 @@ server.listen(3000);
 io = io.listen(server);
 
 // Add a connect listener
-io.sockets.on('connection', function(socket)
-{
+io.sockets.on('connection', function(socket){
   console.log('Client connected.');
 
   // Disconnect listener
@@ -32,7 +31,7 @@ io.sockets.on('connection', function(socket)
 });
 
 (function send(io){
-  db.select("long_id","lat","lng","time_of_last_location").from("Beacon").then(function(rows){
+  db.select("long_id","lat","lng","time_of_last_location","water","food","clothing").from("Beacon").then(function(rows){
     io.sockets.emit("beacons",rows)
     setTimeout(function(){ send(io); },1000);
   });
