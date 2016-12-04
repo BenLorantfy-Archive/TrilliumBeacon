@@ -75,7 +75,7 @@ section{
     width:60%;
 }
 
-#beacons{
+#beacons,#beacon{
     position: fixed;
     z-index: 3;
     top:0;
@@ -83,6 +83,23 @@ section{
     height: 100%;
     background-color:rgba(255,255,255,0.5);
     width: 200px;
+    white-space: nowrap;
+}
+
+.sidebarContainer{
+    padding:15px;
+}
+
+#beaconHeader{
+    font-size:18px;
+}
+
+#beaconId{
+    color:grey;
+}
+
+#beaconId::before{
+    content:"# ";
 }
 
 input[type="text"],input[type="password"]{
@@ -229,4 +246,45 @@ input[type="button"],button{
 
 #signupUI{
     display: none;
+}
+
+/* Beacon Details Pane */
+#beacon .lat{
+    font-size:14px;
+}
+#beacon .lng{
+    font-size:14px;
+}
+
+#beacon .signal{
+    vertical-align: middle;
+    font-size:14px;
+}
+
+#beacon .signal::before{
+    content:"";
+    width:10px;
+    height: 10px;
+    vertical-align: middle;
+    border-radius:20px;
+    background-color:black;
+    display: inline-block;
+    margin-top:-3px;
+    margin-right:5px;
+}
+
+#beacon .signal.water::before{
+    background-color:#00AEEF;
+}
+
+#beacon .signal.food::before{
+    background-color:#2BB673;
+}
+
+#beacon .signal.clothing::before{
+    background-color:#C49A6C;
+}
+
+#beacon .signal.emergency::before{
+    background-color:#ED1C24;
 }
