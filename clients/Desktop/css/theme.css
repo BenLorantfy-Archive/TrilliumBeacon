@@ -12,6 +12,13 @@ html,body{
     font-family: Helvetica, Arial, sans-serif;
     overflow:hidden;
     font-weight: 100;
+    
+    background-color:white;
+}
+
+table{
+    border-collapse: collapse;
+    border-spacing: 0;
 }
 
 ::-webkit-input-placeholder{
@@ -44,8 +51,8 @@ section{
     position: absolute;
     top:0;
     left: 0;
-    width:100%;
-    height: 100%;
+    right:250px;
+    bottom:0;
 }
 
 #loginScreen:before {
@@ -81,17 +88,19 @@ section{
     top:0;
     right:0;
     height: 100%;
-    background-color:rgba(255,255,255,0.5);
-    width: 200px;
+    background-color:rgba(255,255,255,0.8);
+    width: 250px;
     white-space: nowrap;
 }
 
 .sidebarContainer{
+    position: absolute;
+    top:0;
+    left:0;
+    width:250px;
+    height: 100%;
     padding:15px;
-}
-
-#beaconHeader{
-    font-size:18px;
+    white-space: normal;
 }
 
 #beaconId{
@@ -249,11 +258,21 @@ input[type="button"],button{
 }
 
 /* Beacon Details Pane */
+#beacon .address{
+    font-size:14px;
+}
 #beacon .lat{
     font-size:14px;
 }
 #beacon .lng{
     font-size:14px;
+}
+
+.detailsLabel{
+    vertical-align: top;
+    font-weight: 500;
+    padding-right:10px;
+    font-size:12px;
 }
 
 #beacon .signal{
@@ -287,4 +306,27 @@ input[type="button"],button{
 
 #beacon .signal.emergency::before{
     background-color:#ED1C24;
+}
+
+#beacon .first{
+    font-size:14px;
+}
+
+#beacon .last{
+    font-size:14px;
+}
+
+.signalSince{
+    color:grey;
+    font-size:12px;
+}
+
+.detailsHeader{
+    margin-top:10px;
+    margin-bottom: 2px;
+}
+
+.sideBarHeader{
+    font-size:18px;
+    margin-top:0;
 }

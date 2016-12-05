@@ -11,8 +11,7 @@ console.log("========================");
 console.log("Listening on port 4000");
 
 // Create server & socket
-var server = http.createServer(function(req, res)
-{
+var server = http.createServer(function(req, res){
   // Send HTML headers and message
   res.writeHead(200, {'Content-Type': 'text/html'});
   res.end('<h1>Status: Online</h1>');
@@ -33,7 +32,7 @@ io.sockets.on('connection', function(socket){
           db("Beacon").where("id",id).update({
              lat:data.lat
             ,lng:data.lng
-            ,time_of_last_location:data.date
+            ,time_of_last_location:(new Date()).toISOString()
           }).then();
         });
     });
@@ -46,15 +45,18 @@ io.sockets.on('connection', function(socket){
             
             if(data.type == "water"){
                 query.update({
-                    water:1
+                     water:1
+                    ,water_since:(new Date()).toISOString()
                 });
             }else if(data.type == "food"){
                 query.update({
-                    food:1
+                     food:1
+                    ,food_since:(new Date()).toISOString()
                 });           
             }else if(data.type == "clothing"){
                 query.update({
-                    clothing:1
+                     clothing:1
+                    ,clothing_since:(new Date()).toISOString()
                 });                  
             }
             
@@ -94,3 +96,22 @@ io.sockets.on('connection', function(socket){
   	console.log('Client disconnected.');
   });
 });
+
+(function send(io){
+  db.select(
+      "long_id as id",
+      "lat",
+      "lng",
+      "time_of_last_location",
+      "water",
+      "food",
+      "clothing",
+      "water_since",
+      "food_since",
+      "clothing_since"
+  ).from("Beacon").then(function(rows){
+    io.sockets.emit("beacons",rows)
+    setTimeout(function(){ send(io); },1000);
+  });
+
+})(io);

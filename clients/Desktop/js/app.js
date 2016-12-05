@@ -6,6 +6,7 @@ var app = angular.module('app', []);
 app.controller('MainController', function($scope, $compile) {
     var animationDuration = 300;
     var selectedBeacon = null;
+    $.request.host = "http://localhost:3000/";
     
     function renderMapScreen(){
         $('#beacon').animate({ width: 'toggle' },0);
@@ -28,13 +29,22 @@ app.controller('MainController', function($scope, $compile) {
         var markers = [];
         var once = false;
         // var socket = io("http://ec2-54-88-176-255.compute-1.amazonaws.com:3000/", { reconnect:true });
-        var socket = io("http://localhost:3000/", { reconnect:true });
+        var socket = io("http://localhost:4000/", { reconnect:true });
 
         var placedBeacons = [];
         socket.on("beacons",function(beacons){
 
             // [ Add all the new markers]
             $.each(beacons,function(i,beacon){
+
+                var marker = null
+                for(var i = 0; i < placedBeacons.length; i++){
+                    if(placedBeacons[i].beacon.id == beacon.id){
+                        marker = placedBeacons[i].marker;
+                        placedBeacons[i].beacon = beacon; // Update beacon
+//                        break;
+                    }
+                }                
                 
                 // Update beacon details if selected
                 if(selectedBeacon){
@@ -45,13 +55,7 @@ app.controller('MainController', function($scope, $compile) {
                 }
 
                 
-                // Check if beacon is already placed
-                var marker = null
-                for(var i = 0; i < placedBeacons.length; i++){
-                    if(placedBeacons[i].beacon.id == beacon.id){
-                        marker = placedBeacons[i].marker;
-                    }
-                }
+
   
                 // [ Get icon url ]
                 var icon = "";
@@ -141,6 +145,10 @@ app.controller('MainController', function($scope, $compile) {
                         }else{
 
                         }  
+                        
+                        // [ Zoom to Pin ]
+                        map.setZoom(17);
+                        map.panTo(marker.position);
                     });
                     
                     // [ Add to list of placed beacons ]
@@ -162,6 +170,22 @@ app.controller('MainController', function($scope, $compile) {
                 
             })
         })
+        
+        setInterval(function(){
+            updateDates();
+        },1000);
+        
+        function updateDates(){
+            $(".date").each(function(){
+                var isoDate = $(this).attr("data-date");
+                if(isoDate == ""){
+                    $(this).text("");
+                }else{
+                    var fromNow = moment(isoDate).fromNow();
+                    $(this).text(fromNow);                    
+                }
+            })
+        }
     
         function updateBeaconDetails(){
             var beacon = selectedBeacon;
@@ -172,9 +196,123 @@ app.controller('MainController', function($scope, $compile) {
             if(!beacon.food) $("#beacon .food").hide();
             if(!beacon.clothing) $("#beacon .clothing").hide();
             if(!beacon.emergency) $("#beacon .emergency").hide();
+            
+            
+            $("#beacon .waterSince").attr("data-date",beacon.water_since);
+            $("#beacon .foodSince").attr("data-date",beacon.food_since);
+            $("#beacon .clothingSince").attr("data-date",beacon.clothing_since);
+            updateDates();
+            
 
             $("#beacon .lat").text(beacon.lat);
-            $("#beacon .lng").text(beacon.lng);     
+            $("#beacon .lng").text(beacon.lng);   
+            
+            // If place hasn't been found in 500ms, tell user it's looking
+            // Waiting 500ms avoids "Looking..." flashing over and over
+            var timeout = setTimeout(function(){
+                $("#beacon .address").text("Looking...");
+            },500);
+            
+            geocodeLatLng(beacon.lat,beacon.lng,function(address,unknown){
+                // Clear looking... timeout so looking... isn't displayed since it's not looking anymore
+                clearTimeout(timeout);
+                
+                // [ Update address unless user clicked a different beacon since geocoding started ]
+                if(selectedBeacon){
+                    if(beacon.id == selectedBeacon.id){
+                         $("#beacon .address").text(address);
+                    }                    
+                }
+            });          
+        }
+        
+        var geoCodeCache = [];
+        function geocodeLatLng(lat, lng, callback) {
+            if(typeof callback !== "function") return;
+            
+            // [ First check geoCodeCache ]
+            for(var i = 0; i < geoCodeCache.length; i++){
+                if(geoCodeCache[i].lat == lat && geoCodeCache[i].lng == lng){
+                    callback(geoCodeCache[i].address, false);
+                    return;
+                }
+            }
+                
+            var geocoder = new google.maps.Geocoder;
+            var latlng = { lat: lat, lng: lng };
+            geocoder.geocode({'location': latlng}, function(results, status) {
+                if (status === 'OK') {
+                    if (results[1]) {
+                        var longAddress = results[1].formatted_address;
+                        var address = "";
+                        
+                        // Try to compile nicer looking address
+                        if(results[1].address_components){
+                            if(results[1].address_components.length > 0){
+                                
+                                var done = false;
+                                for(var i = 0; i < results[1].address_components.length; i++){
+                                    if(results[1].address_components[i].types){
+                                        
+                                        for(var j = 0; j < results[1].address_components[i].types.length; j++){
+                                            if(
+                                                 results[1].address_components[i].types[j] == "locality"
+                                              || results[1].address_components[i].types[j].indexOf("administrative_area") >= 0
+                                              || results[1].address_components[i].types[j] == "country"
+                                            ){
+                                                done = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    
+                                    if(done){
+                                        break;
+                                    }else{
+                                        if(address != ""){
+                                            address += ", ";
+                                        }
+                                        address += results[1].address_components[i].long_name;
+                                    }
+                                    
+                                }
+                                
+                                if(address == ""){
+                                    address = longAddress;
+                                }
+                            }else{
+                                address = longAddress;
+                            }
+                        }else{
+                            address = longAddress;
+                        }
+                        
+                        // [ Cache the geocodes so we don't go over query limit ]
+                        geoCodeCache.push({
+                             lat:lat
+                            ,lng:lng
+                            ,address:address
+                        });
+                        if(geoCodeCache.length > 200){
+                            
+                            // Remove old entry so RAM isn't used up completely
+                            array.shift();
+                        }
+                        callback(address,false);
+                    } else {
+
+                        // No address found at these coordinates
+                        callback("Unknown",true);
+                    }
+                } else {
+//                    console.warn("Hit query limit");
+//                    setTimeout(function(){
+//                        
+//                        // Try again after waiting for query limit
+//                        geocodeLatLng(lat, lng, callback);
+//                    },300);
+                }
+            });
         }
     }
 
@@ -203,16 +341,22 @@ app.controller('MainController', function($scope, $compile) {
         
         // [ Login user ]
         $("#login").click(function(){
-            $("#loginScreen").fadeToggle("fast",function(){
-                $("#mapScreen").fadeToggle("fast");
-                renderMapScreen();
-            });
+            var email = $("#email").val();
+            var password = $("#password").val();
+            
+            $.request("POST","/token",{
+                 email:email
+                ,password:password
+            }).done(function(){
+                $("#loginScreen").fadeToggle("fast",function(){
+                    $("#mapScreen").fadeToggle("fast");
+                    renderMapScreen();
+                });
 
-//            setTimeout(function(){
-//                renderMapScreen();
-//            },200);
+                expandWindow();                
+            })
+            
 
-            expandWindow();
         });      
         
         function expandWindow(){

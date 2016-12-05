@@ -1,10 +1,16 @@
 // Author: Ben Lorantfy
 // Desc: A helper plugin that simplifies jquery syntax for creating REST ajax requests
+// Version: 2.0
 
 (function($,window,document){
-	$.request = function(verb,path,data){
-		var json = JSON.stringify(data);
-
+	$.request = function(verb,path,data,binary){
+        var isFileUpload = data instanceof FormData;
+        var json = null;
+        
+        if(!isFileUpload){
+            json = JSON.stringify(data);
+        }
+		
 		// [ Format slashes ]
 		var host = $.request.host;
 		if(host[host.length - 1] == "/"){
@@ -19,9 +25,21 @@
 
 		// [ Add Token to request if it exists ]
 		if($.request.token){
-			xhr.setRequestHeader("X-Token", $.request.token);
+			xhr.setRequestHeader("x-token", $.request.token);
 		}
+        
+		// [ Add screen width & height to request for analytics ]
+		xhr.setRequestHeader("x-screen-width", $(window).width());
+		xhr.setRequestHeader("x-screen-height", $(window).height());
 
+        if(!isFileUpload){
+            xhr.setRequestHeader("Content-Type", "application/json");
+        }
+        
+        if(binary){
+            xhr.responseType = 'blob';
+        }
+		
 		var handler = {
 			 doneCallback:function(){}
 			,failCallback:function(){}
@@ -35,21 +53,50 @@
 			}
 		}
 
-		xhr.onload = function(event){
-			// debugger;
-			try{
-				var json = event.currentTarget.responseText;
-				handler.doneCallback(JSON.parse(json));
-			}catch(ex){
-				handler.failCallback(event);
-			}
-		}
+//        (function(binary){
+            xhr.onload = function(event){
+                if(binary){
+                    var blob = this.response;
+                    var blobUrl = null;
+                    try{
+                        blobUrl = window.URL.createObjectURL(blob);
+                        handler.doneCallback(blobUrl);
+                    }catch(e){
+                        console.error("window.URL.createObjectURL failed:" + e);
+                        blobUrl = null;
+                        handler.failCallback();
+                    }                 
+                    
+                    return;
+                }
+                
+                try{
+                    var json = event.currentTarget.responseText;
+                    var data = JSON.parse(json);
+                    if(data.error){
+                        handler.failCallback(data);
+                    }else{
+                        handler.doneCallback(data);
+                    }
+
+                }catch(ex){
+                    handler.failCallback(event);
+                }
+            };
+            
+//        })(false);
+
 
 		xhr.onerror = function(event){
 			handler.failCallback(event);
 		}
 
-		xhr.send(json);
+        if(isFileUpload){
+            xhr.send(data);
+        }else{
+            xhr.send(json);
+        }
+		
 
 		return handler;
 	}

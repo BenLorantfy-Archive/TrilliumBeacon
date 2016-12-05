@@ -11,10 +11,14 @@
     <body ng-app="app" ng-controller="MainController">
         <section id="loginScreen">
             <img id="logo" src="img/logo.png" />
-            <input id="username" type="text" placeholder="Username" />
+            <input id="email" type="text" placeholder="Email" />
+            <div class="extraFieldContainer">
+                <input id="displayName" type="text" placeholder="Display Name" />
+            </div>
             <input id="password" type="password" placeholder="Password" />
             <div class="extraFieldContainer">
-                <input id="confirmPassword" type="password" placeholder="Confirm Password" />                
+                <input id="confirmPassword" type="password" placeholder="Confirm Password" />     
+                <input id="cityPassword" type="password" placeholder="Invitation Code" />
             </div>
             <div id="signupUI">
                 <input type="button" value="Sign Up" id="signup" />
@@ -27,20 +31,46 @@
         <section id="mapScreen" style="display:none">      
             <div id="beacon">
                 <div class="sidebarContainer">
-                    <div id="beaconHeader">Beacon <span id="beaconId">123</span></div>
-                    <div class="lat"></div>
-                    <div class="lng"></div>
-                    <div id="signalingHeader">Signals</div>
-                    <div class="water signal">Water</div>
-                    <div class="food signal">Food</div>
-                    <div class="clothing signal">Clothing</div>
-                    <div class="emergency signal">Emergency</div>
+                    <div id="beaconHeader" class="detailsHeader sideBarHeader">Beacon <span id="beaconId">123</span></div>
+                    <div id="signalingHeader" class="detailsHeader">Position</div>
+                    <table cellspacing="0">
+                        <tr>
+                            <td class="detailsLabel">Address:</td>
+                            <td><div class="address"></div></td>
+                        </tr>
+                        <tr>
+                            <td class="detailsLabel">Lat:</td>
+                            <td><div class="lat"></div></td>                       
+                        </tr>
+                        <tr>
+                            <td class="detailsLabel">Lng:</td>
+                            <td><div class="lng"></div></td>                       
+                        </tr>
+                    </table>                 
+                    
+                    <div id="signalingHeader" class="detailsHeader">Signals</div>
+                    <div class="water signal">Water <span class="waterSince date signalSince"></span></div>
+                    <div class="food signal">Food <span class="foodSince date signalSince"></span></div>
+                    <div class="clothing signal">Clothing <span class="clothingSince date signalSince"></span></div>
+                    <div class="emergency signal">Emergency <span class="emergencySince date signalSince"></span></div>
+                    
+                    <div id="signalingHeader" class="detailsHeader">Registered To</div>
+                    <table cellspacing="0">
+                        <tr>
+                            <td class="detailsLabel">First:</td>
+                            <td><div class="first">Ben</div></td>
+                        </tr>
+                        <tr>
+                            <td class="detailsLabel">Last:</td>
+                            <td><div class="last">Lorantfy</div></td>                       
+                        </tr>
+                    </table>  
                 </div>
                 
             </div>
             <div id="beacons">
                 <div class="sidebarContainer">
-                    
+                    <div id="beaconHeader" class="detailsHeader sideBarHeader">Beacons</div>
                 </div>
             </div>
             <div id="map"></div>
@@ -53,6 +83,7 @@
     <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCoWCetGs1VpoUOt3nQ4_MU-eg4BKXiROo"></script>
     <script src="js/lib/socket.io-1.4.5.js"></script>    
+    <script src="js/lib/moment.js"></script>    
     <script src="js/lib/jquery.js"></script>    
     <script src="js/lib/request.js"></script>
     <script src="js/lib/contextmenu.js"></script>
