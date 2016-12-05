@@ -28,5 +28,16 @@
         },
         "is_top_level": false,
         "variables": {}
+    },
+    "cordova-plugin-facebook4": {
+        "source": {
+            "type": "registry",
+            "id": "cordova-plugin-facebook4"
+        },
+        "is_top_level": true,
+        "variables": {
+            "APP_ID": "398780513787131",
+            "APP_NAME": "TrilliumBeacon"
+        }
     }
 }

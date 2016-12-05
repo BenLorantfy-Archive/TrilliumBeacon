@@ -1,9 +1,15 @@
 {
-  "client": "mysql",
-  "connection": {
-    "host" : "127.0.0.1",
-    "user" : "root",
-    "password" : "root",
-    "database" : "BeaconNetwork"
-  }
+    database:{
+      "client": "mysql",
+      "connection": {
+        "host" : "127.0.0.1",
+        "user" : "root",
+        "password" : "root",
+        "database" : "BeaconNetwork"
+      }        
+    }
+    ,facebook:{
+         id:"398780513787131"
+        ,key:"019acf717263f11e0fd91c2ee289a03e"
+    }
 }

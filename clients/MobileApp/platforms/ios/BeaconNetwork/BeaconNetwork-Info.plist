@@ -49,6 +49,25 @@
     <true/>
     <key>NSAppTransportSecurity</key>
     <dict>
+      <key>NSExceptionDomains</key>
+      <dict>
+        <key>m.facebook.com</key>
+        <dict/>
+        <key>graph.facebook.com</key>
+        <dict/>
+        <key>api.facebook.com</key>
+        <dict/>
+        <key>fbcdn.net</key>
+        <dict>
+          <key>NSIncludesSubdomains</key>
+          <true/>
+        </dict>
+        <key>akamaihd.net</key>
+        <dict>
+          <key>NSIncludesSubdomains</key>
+          <true/>
+        </dict>
+      </dict>
       <key>NSAllowsArbitraryLoads</key>
       <true/>
     </dict>
@@ -56,6 +75,10 @@
     <array>
       <string>googlechromes</string>
       <string>comgooglemaps</string>
+      <string>fbapi</string>
+      <string>fb-messenger-api</string>
+      <string>fbauth2</string>
+      <string>fbshareextension</string>
     </array>
     <key>Google Maps API Key</key>
     <string>AIzaSyDS8Utc_ayE4gPD2mTO80Eqm9w_0Dkl9sI</string>
@@ -75,6 +98,16 @@
           <string>com.benlorantfy.beaconnetwork</string>
         </array>
       </dict>
+      <dict>
+        <key>CFBundleURLSchemes</key>
+        <array>
+          <string>fb398780513787131</string>
+        </array>
+      </dict>
     </array>
+    <key>FacebookAppID</key>
+    <string>398780513787131</string>
+    <key>FacebookDisplayName</key>
+    <string>TrilliumBeacon</string>
   </dict>
 </plist>

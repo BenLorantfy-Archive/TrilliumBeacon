@@ -1,5 +1,5 @@
 {
-  "name": "TrillumBeaconAdminServer",
+  "name": "TrillumBeaconAppServer",
   "repository": "https://github.com/BenLorantfy/TrillumBeacon",
   "description": "TrillumBeacon",
   "version": "0.0.0",
@@ -7,7 +7,8 @@
     "bcrypt-nodejs": "0.0.3",
     "express": "^4.14.0",
     "knex": "^0.12.6",
-    "mysql": "^2.12.0"
+    "mysql": "^2.12.0",
+    "socket.io": "^1.6.0"
   },
   "scripts": {
     "start": "node app"

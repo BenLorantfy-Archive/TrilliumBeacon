@@ -49,6 +49,11 @@
 		F9C228E3CE6344819C6F00F6 /* MyReachability.m in Sources */ = {isa = PBXBuildFile; fileRef = D917155DC9DA4943BD9E0D82 /* MyReachability.m */; };
 		23B3F8A22CB1477BA7C19730 /* MyPluginLayerDebugView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7BD113EA98804D1CABFA6476 /* MyPluginLayerDebugView.m */; };
 		86C0B46966E3471D94E9E554 /* MyPluginScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D3105F0362A414BA576FE23 /* MyPluginScrollView.m */; };
+		AD55DEC4B82F48E19D0525C6 /* FacebookConnectPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FE0F1C48BB6494AAEB6CD64 /* FacebookConnectPlugin.m */; };
+		191AEB8DF1944EC1BD20AAE9 /* Bolts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 952B219A1F784840961A396C /* Bolts.framework */; };
+		1A76D0DFE81D4CC6B69FA0A6 /* FBSDKCoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E1F66513DA2456D9DB0ECCA /* FBSDKCoreKit.framework */; };
+		0C3B3568CE2842E89FA21D67 /* FBSDKLoginKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D8A95395EC524C76A40E6D94 /* FBSDKLoginKit.framework */; };
+		014313EA201843958464000B /* FBSDKShareKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0844DE63B1344F869CB95CDB /* FBSDKShareKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -147,6 +152,12 @@
 		2C7C32315B3845389B26B738 /* MyReachability.h */ = {isa = PBXFileReference; name = "MyReachability.h"; path = "cordova-plugin-googlemaps/MyReachability.h"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; explicitFileType = undefined; includeInIndex = 0; };
 		8585CB0EC1E94BF39E18F451 /* MyPluginLayerDebugView.h */ = {isa = PBXFileReference; name = "MyPluginLayerDebugView.h"; path = "cordova-plugin-googlemaps/MyPluginLayerDebugView.h"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; explicitFileType = undefined; includeInIndex = 0; };
 		9F11135B95454EDF8E4E4CBB /* MyPluginScrollView.h */ = {isa = PBXFileReference; name = "MyPluginScrollView.h"; path = "cordova-plugin-googlemaps/MyPluginScrollView.h"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; explicitFileType = undefined; includeInIndex = 0; };
+		7FE0F1C48BB6494AAEB6CD64 /* FacebookConnectPlugin.m */ = {isa = PBXFileReference; name = "FacebookConnectPlugin.m"; path = "cordova-plugin-facebook4/FacebookConnectPlugin.m"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; explicitFileType = undefined; includeInIndex = 0; };
+		86E3C3FD04C2450880B8BC22 /* FacebookConnectPlugin.h */ = {isa = PBXFileReference; name = "FacebookConnectPlugin.h"; path = "cordova-plugin-facebook4/FacebookConnectPlugin.h"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; explicitFileType = undefined; includeInIndex = 0; };
+		952B219A1F784840961A396C /* Bolts.framework */ = {isa = PBXFileReference; name = "Bolts.framework"; path = "BeaconNetwork/Plugins/cordova-plugin-facebook4/Bolts.framework"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = wrapper.framework; explicitFileType = undefined; includeInIndex = 0; };
+		9E1F66513DA2456D9DB0ECCA /* FBSDKCoreKit.framework */ = {isa = PBXFileReference; name = "FBSDKCoreKit.framework"; path = "BeaconNetwork/Plugins/cordova-plugin-facebook4/FBSDKCoreKit.framework"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = wrapper.framework; explicitFileType = undefined; includeInIndex = 0; };
+		D8A95395EC524C76A40E6D94 /* FBSDKLoginKit.framework */ = {isa = PBXFileReference; name = "FBSDKLoginKit.framework"; path = "BeaconNetwork/Plugins/cordova-plugin-facebook4/FBSDKLoginKit.framework"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = wrapper.framework; explicitFileType = undefined; includeInIndex = 0; };
+		0844DE63B1344F869CB95CDB /* FBSDKShareKit.framework */ = {isa = PBXFileReference; name = "FBSDKShareKit.framework"; path = "BeaconNetwork/Plugins/cordova-plugin-facebook4/FBSDKShareKit.framework"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = wrapper.framework; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -170,6 +181,10 @@
 				144E002B437343D58A56B83F /* GoogleMapsBase.framework in Frameworks */,
 				0B0CB91584394D998F9D0ECF /* GoogleMaps.framework in Frameworks */,
 				2A869F37604941828D6DB875 /* GoogleMapsCore.framework in Frameworks */,
+				191AEB8DF1944EC1BD20AAE9 /* Bolts.framework in Frameworks */,
+				1A76D0DFE81D4CC6B69FA0A6 /* FBSDKCoreKit.framework in Frameworks */,
+				0C3B3568CE2842E89FA21D67 /* FBSDKLoginKit.framework in Frameworks */,
+				014313EA201843958464000B /* FBSDKShareKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -256,6 +271,10 @@
 				03711BCAB89C4C5AB7E96CA3 /* GoogleMapsBase.framework */,
 				391EC4536D4E4EA1B64B91F2 /* GoogleMaps.framework */,
 				22BC2CF421254025994BCCF0 /* GoogleMapsCore.framework */,
+				952B219A1F784840961A396C /* Bolts.framework */,
+				9E1F66513DA2456D9DB0ECCA /* FBSDKCoreKit.framework */,
+				D8A95395EC524C76A40E6D94 /* FBSDKLoginKit.framework */,
+				0844DE63B1344F869CB95CDB /* FBSDKShareKit.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -323,6 +342,8 @@
 				2C7C32315B3845389B26B738 /* MyReachability.h */,
 				8585CB0EC1E94BF39E18F451 /* MyPluginLayerDebugView.h */,
 				9F11135B95454EDF8E4E4CBB /* MyPluginScrollView.h */,
+				7FE0F1C48BB6494AAEB6CD64 /* FacebookConnectPlugin.m */,
+				86E3C3FD04C2450880B8BC22 /* FacebookConnectPlugin.h */,
 			);
 			name = Plugins;
 			path = BeaconNetwork/Plugins;
@@ -464,6 +485,7 @@
 				F9C228E3CE6344819C6F00F6 /* MyReachability.m in Sources */,
 				23B3F8A22CB1477BA7C19730 /* MyPluginLayerDebugView.m in Sources */,
 				86C0B46966E3471D94E9E554 /* MyPluginScrollView.m in Sources */,
+				AD55DEC4B82F48E19D0525C6 /* FacebookConnectPlugin.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -508,6 +530,10 @@
 					"\"BeaconNetwork/Plugins/com.googlemaps.ios\"",
 					"\"BeaconNetwork/Plugins/com.googlemaps.ios\"",
 					"\"BeaconNetwork/Plugins/com.googlemaps.ios\"",
+					"\"BeaconNetwork/Plugins/cordova-plugin-facebook4\"",
+					"\"BeaconNetwork/Plugins/cordova-plugin-facebook4\"",
+					"\"BeaconNetwork/Plugins/cordova-plugin-facebook4\"",
+					"\"BeaconNetwork/Plugins/cordova-plugin-facebook4\"",
 				);
 			};
 			name = Debug;
@@ -540,6 +566,10 @@
 					"\"BeaconNetwork/Plugins/com.googlemaps.ios\"",
 					"\"BeaconNetwork/Plugins/com.googlemaps.ios\"",
 					"\"BeaconNetwork/Plugins/com.googlemaps.ios\"",
+					"\"BeaconNetwork/Plugins/cordova-plugin-facebook4\"",
+					"\"BeaconNetwork/Plugins/cordova-plugin-facebook4\"",
+					"\"BeaconNetwork/Plugins/cordova-plugin-facebook4\"",
+					"\"BeaconNetwork/Plugins/cordova-plugin-facebook4\"",
 				);
 			};
 			name = Release;

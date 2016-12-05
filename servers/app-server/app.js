@@ -1,16 +1,17 @@
 var http 	= require('http');
 var io 		= require('socket.io');
 var knex 	= require('knex');
- var bcrypt = require("bcrypt-nodejs");
+var bcrypt  = require("bcrypt-nodejs");
 var express = require("express");
+var request = require("request");
 var config  = require("./config.json");
 
-var db  = knex(config);
+var db  = knex(config.database);
 var app = express();
 
 console.log("\nStarting App Server");
 console.log("=====================");
-console.log("Listening on port 3000");
+console.log("Listening on port 2000");
 
 // [ Error Handling Utils ]
 var errors = {
@@ -101,17 +102,15 @@ app.use (function(req, res, next) {
     }
     
     // [ Check db for token record that matches ]
-    db("AdminToken")
-        .leftJoin("AdminUser","AdminToken.user_id","AdminUser.id")
-        .select("AdminUser.id","AdminUser.email")
+    db("Token")
+        .leftJoin("User","Token.user_id","User.id")
+        .select("User.id")
         .where("token",token)
         .where("revoked",0)
         .then(function(row){
             if(row.length == 1){
                 req.user = {
-                     email:row[0].email
-                    ,displayName:row[0].display_name
-                    ,id:row[0].id
+                     id:row[0].id
                 }
 
                 next();
@@ -123,6 +122,10 @@ app.use (function(req, res, next) {
     
 });
 
+app.get("/",function(req,res){
+    res.end("Online");
+})
+
 // [ Endpoint to create token for a user ]
 app.post("/token",function(req,res){
     // [ Make sure body is present ]
@@ -131,83 +134,79 @@ app.post("/token",function(req,res){
     var data = req.body;
     
     // [ Make sure username is present and valid ]
-    if(!data.email)                      return res.end(error("Missing username", errors.MISSING_FIELD));
-    if(typeof data.email !== "string")   return res.end(error("Username should be string", errors.BAD_DATA_TYPE));
-    if(data.email > 100)                 return res.end(error("Username is too long", errors.TOO_LONG));
-    
-    // [ Make sure password is present and valid ]
-    if(!data.password)                      return res.end(error("Missing password", errors.MISSING_FIELD));
-    if(typeof data.password !== "string")   return res.end(error("Password should be string", errors.BAD_DATA_TYPE));
-  
-    // [ Authentcates user ]
-    function authenticate(){
-        // [ Tries to find requested user by username ]
-        db("AdminUser")
-            .select("id","email","password_hash")
-            .where("email",data.email)
-            .then(function(rows){
-                // [ Checks if user was found ]
-                if(rows.length == 0) return res.end(error("User doesn't exist", errors.NO_USER));
-                var row = rows[0];
+    if(!data.accessToken)                      return res.end(error("Missing access token", errors.MISSING_FIELD));
+    if(typeof data.accessToken !== "string")   return res.end(error("Access token should be string", errors.BAD_DATA_TYPE));
 
-                // [ Checks if password matches hash ]
-                var authenticated = bcrypt.compareSync(data.password, row.password_hash);
-
-                // [ Returns error if not authenticated ]
-                if(!authenticated) return res.end(error("Password doesn't match", errors.BAD_PASSWORD));
-
-                // [ User is authenticated, create token ]
-                var token = {
-                     "token": generateGUID() + "-" + generateGUID() + "-" + generateGUID()
-                    ,"date_created": (new Date()).toISOString()
-                    ,"user_id": row.id
-                    ,"created_with_screen_width": req.headers["x-screen-width"]
-                    ,"created_with_screen_height": req.headers["x-screen-height"]
-                };
-
-                db("AdminToken").insert(token).then(function(){
-                    res.json({
-                        token:token.token
-                    });                
-                });
-            });        
-    }    
-    
-    // [ Check if user wants to sign up ]
-    if(data.signup){
-        // [ If user wants to sign up, check additional fields ]
-        if(!data.confirmPassword) return res.end(error("Missing confirmation password", errors.MISSING_FIELD));
-       
-        // [ To avoid typos in passwords, make sure password matches confirmation password ]
-        if(data.confirmPassword !== data.password) return res.end(error("Passwords don't match", errors.PASSWORDS_NOT_MATCHING));
-        
-        // [ Hash the password ]
-        var hash = bcrypt.hashSync(data.password);
-        
-        // [ Insert new user ]
-        db("AdminUser")
-            .insert({
-                 username:data.username
-                ,hash:hash
-                ,dateCreated:(new Date()).toISOString()
-            })
-            .then(function(){
-                // [ Now authenticate after user has been created ]
-                authenticate();
-            })
-            .catch(function(err){
-                if(err.errno == errors.DUPLICATE_KEY){
-                    res.end(error("User already exists", errors.USER_ALREADY_EXISTS));
-                }else{
-                    console.log(err);
-                    res.end(error("Database error"));
+    // [ Verifies facebook token ]
+    var appAccessTokenUrl = "https://graph.facebook.com/oauth/access_token?client_id=" + config.facebook.id + "&client_secret=" + config.facebook.key + "&grant_type=client_credentials";
+    request(appAccessTokenUrl, function (error, response, body) {
+      if (!error && response.statusCode == 200) {
+        var appAccessToken = body;
+          
+        var tokenInfoUrl = "https://graph.facebook.com/debug_token?input_token=" + data.accessToken + "&" + appAccessToken;
+        request(tokenInfoUrl, function (error, response, body) {
+            if (!error && response.statusCode == 200) {
+                var info = null;
+                try{
+                    info = JSON.parse(body).data;
+                }catch(e){
+                    res.end(error("Facebook login failed"));
+                    return;
                 }
-            });
-        
-    }else{
-        // [ If user doesn't want to sign up, skip to authentication step ]
-        authenticate();
+                
+                // [ Make sure token belongs to app ]
+                if(info.app_id != config.facebook.id){
+                    res.end(error("Provided token wasn't for TrilliumBeacon"));
+                    return;
+                }
+                
+                // [ Make sure token isn't expired, revoked, etc. ]
+                if(!info.is_valid){
+                    res.end(error("Provided token wasn't valid"));
+                    return;
+                }
+                
+                // [ Access Token is valid for this app so now authenticate the user ]
+                authenticate();
+                
+            }else{
+                res.end(error("Facebook login failed"));
+                return;
+            }
+        });
+      }else{
+          res.end(error("Facebook login failed"));
+          return;
+      }
+    });
+    
+    function authenticate(){
+        var url = "https://graph.facebook.com/me?fields=first_name,last_name&access_token=" + data.accessToken;
+        request(url, function (error, response, body) {
+          if (!error && response.statusCode == 200) {
+              var user = JSON.parse(body);
+              
+              // login / signup user
+          }
+        }
     }
+
+    console.log("user wants to login with access token: " + data.accessToken);
+    
+    
+//				$appAccessToken = file_get_contents("https://graph.facebook.com/oauth/access_token?client_id=" . $this->facebookAppId . "&client_secret=" . $this->facebookKey . "&grant_type=client_credentials");
+//
+//				// [ Check if provided facebook token is valid ]
+//				$response = json_decode(file_get_contents("https://graph.facebook.com/debug_token?input_token=" . $model["fbToken"] . "&" . $appAccessToken),true);
+//				
+//				if($response == NULL || !isset($response["data"]["is_valid"]) || (isset($response["data"]["is_valid"]) && !$response["data"]["is_valid"])){
+//					return $this->error("Facebook token is invalid");
+//				}
+//				
+//				// [ Check if provided facebook token is for TravelHunt ]
+//				if($response["data"]["app_id"] !== $this->facebookAppId){
+//					return $this->error("Facebook token wasn't for this application.");
+//				}
 });
 
-app.listen(3000);
+app.listen(2000);

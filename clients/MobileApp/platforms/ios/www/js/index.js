@@ -1,3 +1,7 @@
+// Author: Ben Lorantfy
+// Date: Nov 7th 2016
+// Desc: This file is the entry point for the mobile app
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -16,73 +20,296 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+$.request.host = "http://ben.local:2000/";
 var app = {
     // Application Constructor
     initialize: function() {
         document.addEventListener('deviceready', this.onDeviceReady.bind(this), false);
     },
 
-    // deviceready Event Handler
-    //
-    // Bind any cordova events here. Common events are:
-    // 'pause', 'resume', etc.
     onDeviceReady: function() {
-      // var div = document.getElementById("map_canvas");
-
-      // // Initialize the map view
-      // map = plugin.google.maps.Map.getMap(div);
-
-      // // Wait until the map is ready status.
-      // map.addEventListener(plugin.google.maps.event.MAP_READY, function(){
-
-      // });
-
-        var map = new google.maps.Map(document.getElementById('map'), {
-          center: { lat: 43.440494, lng: -80.476204 },
-          zoom: 8
-        });
-
-
-        var markers = [];
-      // .setMap(null);
-
-        var once = false;
-        var socket = io("http://ec2-54-88-176-255.compute-1.amazonaws.com:3000/", { reconnect:true })
-        socket.on("beacons",function(beacons){
-             $.each(markers,function(i,marker){
-                marker.setMap(null);
-             });
-
-            $.each(beacons,function(i,beacon){
-                var marker = new google.maps.Marker({
-                  position: {
-                     lat:beacon.lat
-                    ,lng:beacon.lng
-                  },
-                  map: map
-                });
-
-                markers.push(marker);
-            })
-
-
-            console.log(data);
+        $("#loginButton").click(function(){
+            facebookConnectPlugin.login(["public_profile"], function(data){
+//                {
+//    status: "connected",
+//    authResponse: {
+//        session_key: true,
+//        accessToken: "<long string>",
+//        expiresIn: 5183979,
+//        sig: "...",
+//        secret: "...",
+//        userID: "634565435"
+//    }
+//}
+                
+                alert("Done!");
+                $.request("POST","/token",{
+                    accessToken:data.authResponse.accessToken
+                }).done(function(){
+                    
+                }).fail(function(){
+                    
+                })
+            }, function(){
+               alert("Facebook Connect Failed");
+            });
         })
-    },
-
-    // Update DOM on a Received Event
-    receivedEvent: function(id) {
-        var parentElement = document.getElementById(id);
-        var listeningElement = parentElement.querySelector('.listening');
-        var receivedElement = parentElement.querySelector('.received');
-
-        listeningElement.setAttribute('style', 'display:none;');
-        receivedElement.setAttribute('style', 'display:block;');
-
-        console.log('Received Event: ' + id);
-
-        
     }
 };
+
+function renderMapScreen(){
+        
+        // [ Create the map ]
+        var map = new google.maps.Map(document.getElementById('map'), {
+            center: { lat: 43.440494, lng: -80.476204 },
+            zoom: 9
+        });       
+        
+        map.addListener('click', function() {
+            if($("#beacon").is(":visible")){
+                $('#beacon').animate({ width: 'toggle' },animationDuration,function(){
+                    $('#beacons').animate({ width: 'toggle' },animationDuration);
+                });                  
+            }
+  
+        });
+
+        var markers = [];
+        var once = false;
+        // var socket = io("http://ec2-54-88-176-255.compute-1.amazonaws.com:3000/", { reconnect:true });
+        var socket = io("http://localhost:4000/", { reconnect:true });
+
+        var placedBeacons = [];
+        socket.on("beacons",function(beacons){
+
+            // [ Add all the new markers]
+            $.each(beacons,function(i,beacon){
+
+                var marker = null
+                for(var i = 0; i < placedBeacons.length; i++){
+                    if(placedBeacons[i].beacon.id == beacon.id){
+                        marker = placedBeacons[i].marker;
+                        placedBeacons[i].beacon = beacon; // Update beacon
+//                        break;
+                    }
+                }                
+                
+                // Update beacon details if selected
+                if(selectedBeacon){
+                    if(beacon.id == selectedBeacon.id){
+                        selectedBeacon = beacon;
+                        updateBeaconDetails();
+                    }                    
+                }
+
+                // [ Get icon url ]
+                var icon = "";
+                if(beacon.water){
+                    icon += "-water";
+                }
+                if(beacon.food){
+                    icon += "-food";
+                }
+                if(beacon.clothing){
+                    icon += "-clothing";
+                }
+                if(!beacon.water && !beacon.food && !beacon.clothing){
+                    icon = "blank";
+                }else{
+                    icon = icon.substr(1);
+                }
+
+                icon = "img/pins/" + icon + ".png";                
+                
+                // Edit or create new marker
+                if(marker){
+                    // Beacon already has been placed
+                    marker.setPosition( new google.maps.LatLng( beacon.lat, beacon.lng ) );
+                    
+                    // [ Update coords in list ]
+                    var el = $("#" + beacon.id);
+                    el.attr("lat",beacon.lat).find(".lat").text(beacon.lat);
+                    el.attr("lng",beacon.lng).find(".lng").text(beacon.lng);
+                    
+                    var oldIcon = marker.getIcon();
+                    if(oldIcon.url.replace("-highlighted","") != icon){
+                        
+                        // [ Add highlight if previously highlighted ]
+                        if(oldIcon.url.indexOf("-highlighted") >= 0){
+                            icon = icon.replace(".png","-highlighted.png");
+                        }
+                        
+                        // [ Update icon ]
+                        oldIcon.url = icon;
+                        marker.setIcon(oldIcon);
+                    }
+                }else{
+                    // Beacon hasn't been placed yet
+                    marker = new google.maps.Marker({
+                        position: {
+                             lat:beacon.lat
+                            ,lng:beacon.lng
+                        },
+                        icon:{
+                             url:icon
+                            ,scaledSize:new google.maps.Size(25,30)
+                        },
+
+                        map: map
+                    });
+                    
+                    marker.addListener('click', function() {
+//                        selectedBeacon = null;
+//                        
+//                        // [ Get beacon ]
+//                        for(var i = 0; i < placedBeacons.length; i++){
+//                            if(placedBeacons[i].marker == marker){
+//                                selectedBeacon = placedBeacons[i].beacon;
+//                                break;
+//                            }
+//                        }
+//                        
+//                        updateBeaconDetails();
+//
+//                        if($("#beacons").is(":visible")){
+//                            $('#beacons').animate({ width: 'toggle' },animationDuration,function(){
+//                                $('#beacon').animate({ width: 'toggle' },animationDuration);
+//                            });                            
+//                        }else{
+//
+//                        }  
+//                        
+//                        // [ Zoom to Pin ]
+//                        map.setZoom(17);
+//                        map.panTo(marker.position);
+                    });
+                    
+                    // [ Add to list of placed beacons ]
+                    placedBeacons.push({
+                         beacon:beacon
+                        ,marker:marker
+                    })
+
+                    // [ Add beacon to side list ]
+//                    var el  = $("<beacon-item></beacon-item>");
+//                    el.attr("id",beacon.id);   
+//                    $("#beacons").children().append(el);
+//                    el.attr("lat",beacon.lat);
+//                    el.attr("lng",beacon.lng);
+//                    $compile(el)($scope);
+                }
+                
+                
+                
+            })
+        })
+        
+        setInterval(function(){
+            updateDates();
+        },1000);
+        
+        function updateDates(){
+            $(".date").each(function(){
+                var isoDate = $(this).attr("data-date");
+                if(isoDate == ""){
+                    $(this).text("");
+                }else{
+                    var fromNow = moment(isoDate).fromNow();
+                    $(this).text(fromNow);                    
+                }
+            })
+        }
+    
+        
+        var geoCodeCache = [];
+        function geocodeLatLng(lat, lng, callback) {
+            if(typeof callback !== "function") return;
+            
+            // [ First check geoCodeCache ]
+            for(var i = 0; i < geoCodeCache.length; i++){
+                if(geoCodeCache[i].lat == lat && geoCodeCache[i].lng == lng){
+                    callback(geoCodeCache[i].address, false);
+                    return;
+                }
+            }
+                
+            var geocoder = new google.maps.Geocoder;
+            var latlng = { lat: lat, lng: lng };
+            geocoder.geocode({'location': latlng}, function(results, status) {
+                if (status === 'OK') {
+                    if (results[1]) {
+                        var longAddress = results[1].formatted_address;
+                        var address = "";
+                        
+                        // Try to compile nicer looking address
+                        if(results[1].address_components){
+                            if(results[1].address_components.length > 0){
+                                
+                                var done = false;
+                                for(var i = 0; i < results[1].address_components.length; i++){
+                                    if(results[1].address_components[i].types){
+                                        
+                                        for(var j = 0; j < results[1].address_components[i].types.length; j++){
+                                            if(
+                                                 results[1].address_components[i].types[j] == "locality"
+                                              || results[1].address_components[i].types[j].indexOf("administrative_area") >= 0
+                                              || results[1].address_components[i].types[j] == "country"
+                                            ){
+                                                done = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    
+                                    if(done){
+                                        break;
+                                    }else{
+                                        if(address != ""){
+                                            address += ", ";
+                                        }
+                                        address += results[1].address_components[i].long_name;
+                                    }
+                                    
+                                }
+                                
+                                if(address == ""){
+                                    address = longAddress;
+                                }
+                            }else{
+                                address = longAddress;
+                            }
+                        }else{
+                            address = longAddress;
+                        }
+                        
+                        // [ Cache the geocodes so we don't go over query limit ]
+                        geoCodeCache.push({
+                             lat:lat
+                            ,lng:lng
+                            ,address:address
+                        });
+                        if(geoCodeCache.length > 200){
+                            
+                            // Remove old entry so RAM isn't used up completely
+                            array.shift();
+                        }
+                        callback(address,false);
+                    } else {
+
+                        // No address found at these coordinates
+                        callback("Unknown",true);
+                    }
+                } else {
+//                    console.warn("Hit query limit");
+//                    setTimeout(function(){
+//                        
+//                        // Try again after waiting for query limit
+//                        geocodeLatLng(lat, lng, callback);
+//                    },300);
+                }
+            });
+        }
+    }
+
 
 app.initialize();

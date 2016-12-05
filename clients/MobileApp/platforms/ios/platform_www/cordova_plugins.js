@@ -7,6 +7,14 @@ module.exports = [
         "clobbers": [
             "cordova-plugin-googlemaps"
         ]
+    },
+    {
+        "id": "cordova-plugin-facebook4.FacebookConnectPlugin",
+        "file": "plugins/cordova-plugin-facebook4/www/facebook-native.js",
+        "pluginId": "cordova-plugin-facebook4",
+        "clobbers": [
+            "facebookConnectPlugin"
+        ]
     }
 ];
 module.exports.metadata = 
@@ -14,7 +22,8 @@ module.exports.metadata =
 {
     "cordova-plugin-whitelist": "1.3.0",
     "com.googlemaps.ios": "2.0.1",
-    "cordova-plugin-googlemaps": "1.3.9"
+    "cordova-plugin-googlemaps": "1.3.9",
+    "cordova-plugin-facebook4": "1.7.4"
 };
 // BOTTOM OF METADATA
 });
