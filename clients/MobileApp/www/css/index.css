@@ -18,6 +18,7 @@
  */
 * {
     -webkit-tap-highlight-color: rgba(0,0,0,0); /* make transparent link selection, adjust last value opacity 0 to 1.0 */
+    box-sizing: border-box;
 }
 
 body {
@@ -43,6 +44,48 @@ body {
     padding:0px;
     text-transform:uppercase;
     width:100%;
+}
+
+#background{
+    background-image:url(../img/background.png);
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center center;
+    
+    position: absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    z-index: 0;
+    
+    -webkit-filter:blur(5px);
+    filter:blur(5px);
+}
+
+#logo{
+    display: block;
+    margin-left:auto;
+    margin-right:auto;
+    width:80%;
+    margin-top:30%;
+}
+
+#loginButton{
+    display: block;
+    margin-left:auto;
+    margin-right:auto;
+    width:50%;
+    margin-top:5%;
+}
+
+section{
+    position: absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    z-index: 1;
 }
 
 
@@ -83,47 +126,110 @@ html, body {
     }
 }
 
-h1 {
-    font-size:24px;
-    font-weight:normal;
-    margin:0px;
-    overflow:visible;
-    padding:0px;
-    text-align:center;
+#beacon{
+    position: absolute;
+    bottom:0;
+    left: 0;
+    z-index: 99;
+    width:100%;
+    padding:15px;
+    background-color:rgba(255,255,255,1);
 }
 
-.event {
-    border-radius:4px;
-    -webkit-border-radius:4px;
-    color:#FFFFFF;
+#beaconHeader{
+    font-size: 40px;
+}
+
+#beacon .signal{
+    vertical-align: middle;
+    font-size:14px;
+}
+
+#beacon .signal::before{
+    content:"";
+    width:10px;
+    height: 10px;
+    vertical-align: middle;
+    border-radius:20px;
+    background-color:black;
+    display: inline-block;
+    margin-top:-3px;
+    margin-right:5px;
+}
+
+#beacon .signal.water::before{
+    background-color:#00AEEF;
+}
+
+#beacon .signal.food::before{
+    background-color:#2BB673;
+}
+
+#beacon .signal.clothing::before{
+    background-color:#C49A6C;
+}
+
+.signalSince{
+    color:grey;
     font-size:12px;
-    margin:0px 30px;
-    padding:2px 0px;
 }
 
-.event.listening {
-    background-color:#333333;
-    display:block;
+#markDone{
+    position: absolute;
+    bottom: 15px;
+    right:0px;
+    padding:10px;
+    background-color:#27C244;
+    border:1px solid #20A138;
+    border-radius: 7px;
+    color:white;
 }
 
-.event.received {
-    background-color:#4B946A;
-    display:none;
+#profileButton{
+    position: absolute;
+    left:0;
+    bottom:30px;
+    background-color:rgba(0,0,0,0.5);
+    padding:10px;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    font-size:30px;
+    color:white;
+    padding-left:7px;
 }
 
-@keyframes fade {
-    from { opacity: 1.0; }
-    50% { opacity: 0.4; }
-    to { opacity: 1.0; }
+#darkOverlay{
+    position: absolute;
+    top:0;
+    left:0;
+    width: 100%;
+    height: 100%;
+    z-index:9999;
+    background-color:rgba(0,0,0,0.6);
 }
- 
-@-webkit-keyframes fade {
-    from { opacity: 1.0; }
-    50% { opacity: 0.4; }
-    to { opacity: 1.0; }
+
+#profileInfo{
+    position: absolute;
+    width:80%;
+    left:10%;
+    top:-30%;
+    z-index: 99999;
+    background-color:white;
+    border-radius: 15px;
+    padding:20px;
 }
- 
-.blink {
-    animation:fade 3000ms infinite;
-    -webkit-animation:fade 3000ms infinite;
+
+#profileInfo .name{
+    font-size:18px;
+}
+
+#profileInfo .deliveries{
+    margin-top:7px;
+    color:grey;
+}
+
+#profileInfo .deliveries::before{
+    content:"Deliveries: ";
+    font-weight: 500;
+    color:grey;
 }

@@ -31,6 +31,20 @@ var errors = {
     ,DUPLICATE_KEY:1062
 }
 
+function success(obj){
+    if(isPlainObj(obj)){
+        obj["success"] = true;
+    }
+    
+    if(typeof obj == "undefined"){
+        return JSON.stringify({
+            "success":true
+        });
+    }else{
+        return JSON.stringify(obj);
+    }
+}
+
 function error(message,code){
     if(!code){
         var code = 0;
@@ -184,15 +198,64 @@ app.post("/token",function(req,res){
         var url = "https://graph.facebook.com/me?fields=first_name,last_name&access_token=" + data.accessToken;
         request(url, function (error, response, body) {
           if (!error && response.statusCode == 200) {
-              var user = JSON.parse(body);
+              var fbUser = JSON.parse(body);
               
               // login / signup user
-          }
-        }
+//              res.json(user);
+              db("User")
+                .select("id")
+                .where("facebook_id",fbUser.id)
+                .then(function(rows){
+                    if(rows.length > 0){
+                        createToken(rows[0].id);
+                    }else{
+                        // If user doesn't exist, create em
+                        db("User")
+                            .insert({
+                                 first_name:fbUser.first_name
+                                ,last_name:fbUser.last_name
+                                ,facebook_id:fbUser.id
+                            })
+                            .returning("id")
+                            .then(function(id){
+                                createToken(id);
+                            })
+                            .catch(function(){
+                                res.end(error("Facebook login failed"));
+                            });
+                    
+                    }
+                })
+                .catch(function(e){
+                  console.log(e);
+                  res.end(error("Facebook login failed"));
+                });
+              }else{
+                  res.end(error("Facebook login failed"));
+              }
+        });
     }
-
-    console.log("user wants to login with access token: " + data.accessToken);
     
+    function createToken(id){
+        var token = generateGUID() + "-" + generateGUID() + "-" + generateGUID();
+        db("Token")
+            .insert({
+                 "token": token
+                ,"date_created": (new Date()).toISOString()
+                ,"user_id": id
+                ,"created_with_screen_width": req.headers["x-screen-width"]
+                ,"created_with_screen_height": req.headers["x-screen-height"]
+            }).then(function(){
+                var data = {
+                    token:token
+                };
+            
+                res.end(success(data));
+            })
+            .catch(function(){
+                res.end(error("Facebook login failed"));
+            });
+    }
     
 //				$appAccessToken = file_get_contents("https://graph.facebook.com/oauth/access_token?client_id=" . $this->facebookAppId . "&client_secret=" . $this->facebookKey . "&grant_type=client_credentials");
 //
@@ -207,6 +270,77 @@ app.post("/token",function(req,res){
 //				if($response["data"]["app_id"] !== $this->facebookAppId){
 //					return $this->error("Facebook token wasn't for this application.");
 //				}
+});
+
+app.get("/me",function(req,res){
+    db("User")
+        .select("first_name as firstName")
+        .select("last_name as lastName")
+        .select("deliveries")
+        .where("id", req.user.id)
+        .then(function(rows){
+            if(rows.length > 0){
+                res.json(rows[0]);
+            }else{
+                res.end("Could not find user");
+            }
+        })
+        .catch(function(){
+            res.end(error("Could not get user details because of SQL error"));
+        });
+})
+
+app.post("/deliveries",function(req,res){
+    var data = req.body;
+    if(!req.body) return res.end(error("Missing json body", errors.MISSING_BODY));
+    
+    // [ Make sure beaconId is present and valid ]
+    if(!data.beaconId)                      return res.end(error("Missing beacon id", errors.MISSING_FIELD));
+    if(typeof data.beaconId !== "string")   return res.end(error("Beacon id should be string", errors.BAD_DATA_TYPE));
+     
+    
+    // [ Make sure Beacon exists ]
+    db("Beacon")
+        .select("id")
+        .where("long_id", data.beaconId)
+        .then(function(rows){
+            if(rows.length > 0){
+                // [ Insert Delivery ]
+                db("Delivery")
+                    .insert({
+                         "user_id": req.user.id
+                        ,"beacon_id": rows[0].id
+                        ,"date":(new Date()).toISOString()
+                    })
+                    .then(function(){
+                    
+                        // [ Increase user's delivery count ]
+                        db("User")
+                            .increment("deliveries", 1)
+                            .where("id", req.user.id)
+                            .then(function(){
+                                res.end(success());
+                            })
+                            .catch(function(){
+                                res.end(error("Could not update delivery count beacause of SQL error"));
+                            });
+                        
+                        
+                    })
+                    .catch(function(){
+                        res.end(error("Could not insert delivery beacause of SQL error"));
+                    });
+            }else{
+                res.end(error("Beacon doesn't exist"));
+            }
+     
+        });
+    
+    
+
+    
+    
+    res.end(success());
 });
 
 app.listen(2000);

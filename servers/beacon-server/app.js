@@ -21,20 +21,20 @@ io = io.listen(server);
 
 var recieving = false;
 
-// Add a connect listener
-io.sockets.on('connection', function(socket){
-    console.log('Client connected.');
+// [ On beacon connection ]
+io.of("/beacons").on('connection', function(socket){
+    console.log('Beacon connected.');
 
     socket.on('movement', function(data) {
         verifyRecieving();
-
+        
         getBeacon(data.id,data.key,function(id){
           db("Beacon").where("id",id).update({
              lat:data.lat
             ,lng:data.lng
             ,time_of_last_location:(new Date()).toISOString()
           }).then();
-        });
+        });                
     });
     
     socket.on("signal",function(data){
@@ -91,12 +91,58 @@ io.sockets.on('connection', function(socket){
         })         
     }
 
-  // Disconnect listener
-  socket.on('disconnect', function() {
-  	console.log('Client disconnected.');
-  });
+    // Disconnect listener
+    socket.on('disconnect', function() {
+        console.log('Beacon disconnected.');
+    });
 });
 
+// [ On mobile connection ]
+io.of("/mobile").on('connection', function(socket){
+    console.log('A mobile client connected.');
+    
+    socket.on('movement', function(data) {
+        
+        db.select(
+            "long_id as id",
+            "lat",
+            "lng",
+            "water",
+            "food",
+            "clothing",
+            "water_since",
+            "food_since",
+            "clothing_since"
+        )
+        .where(function(){
+            this.where("water",1).orWhere("food",1).orWhere("clothing",1);
+        })
+        .where("emergency",0)
+        .from("Beacon")
+        .then(function(rows){
+            socket.emit('beacons',rows); 
+        });
+        
+        
+    });
+    
+    // Disconnect listener
+    socket.on('disconnect', function() {
+        console.log('A mobile client disconnected.');
+    });    
+});
+
+// [ On admin connection ]
+io.of("/admins").on('connection', function(socket){
+    console.log('Admin connected.');
+    
+    // Disconnect listener
+    socket.on('disconnect', function() {
+        console.log('Admin disconnected.');
+    });    
+});
+
+// [ Send the admins all the beacons ]
 (function send(io){
   db.select(
       "long_id as id",
@@ -108,9 +154,12 @@ io.sockets.on('connection', function(socket){
       "clothing",
       "water_since",
       "food_since",
-      "clothing_since"
+      "clothing_since",
+      "registered_to_first_name",
+      "registered_to_last_name",
+      "external_number"
   ).from("Beacon").then(function(rows){
-    io.sockets.emit("beacons",rows)
+    io.of("/admins").emit("beacons",rows)
     setTimeout(function(){ send(io); },1000);
   });
 

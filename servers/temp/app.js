@@ -17,7 +17,6 @@ app.post('/beacon', function (req, res) {
 	var key 	= guid();
 	var hash 	= bcrypt.hashSync(key);
 
-
 	db.insert({ 
 		 long_id: longId 
 		,key_hash: hash

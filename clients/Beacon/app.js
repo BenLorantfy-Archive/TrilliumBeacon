@@ -44,7 +44,7 @@ lat = process.argv[4] * 1;
 lng = process.argv[5] * 1;
 
 // [ Create the socket ]
-var socket = io.connect('http://localhost:4000', {reconnect: true});
+var socket = io.connect('http://localhost:4000/beacons', {reconnect: true});
 // var socket = io.connect('http://ec2-54-88-176-255.compute-1.amazonaws.com:4000/', {reconnect: true});
 
 

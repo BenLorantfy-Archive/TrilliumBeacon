@@ -33,21 +33,37 @@
         <meta name="msapplication-tap-highlight" content="no">
         <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
         <link rel="stylesheet" type="text/css" href="css/index.css">
+        <link rel="stylesheet" type="text/css" href="css/lib/font-awesome-4.7.0/css/font-awesome.min.css">
         <title>Hello World</title>
 
         <!-- JS -->
             <!-- Lib -->
+            <script src="js/lib/moment.js"></script>
             <script src="js/lib/jquery-3.1.1.min.js"></script>
             <script src="js/lib/request.js"></script>
             <script src="js/lib/socket.io-1.4.5.js"></script>
     </head>
     <body>
+        <div id="background"></div>
         <section id="loginScreen">
-            <img src="img/logo.png" />
+            <img id="logo" src="img/logo.png" />
             <img id="loginButton" src="img/loginButton.png" />
         </section>
         <section id="mapScreen" style="display:none;">
             <div id="map"></div>
+            <div id="beacon">
+                <div id="beaconHeader">Beacon</div>
+                <div class="water signal">Water <span class="waterSince date signalSince"></span></div>
+                <div class="food signal">Food <span class="foodSince date signalSince"></span></div>
+                <div class="clothing signal">Clothing <span class="clothingSince date signalSince"></span></div>
+                <div id="markDone">Mark Delivery <br/> as Finished</div>
+            </div>
+            <div id="profileButton"><i class="fa fa-user"></i></div>
+            <div id="profileInfo">
+                <div class="name"></div>
+                <div class="deliveries"></div>
+            </div>
+            <div id="darkOverlay" style="display:none;"></div>
 
             <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCoWCetGs1VpoUOt3nQ4_MU-eg4BKXiROo"></script>
             <script type="text/javascript" src="cordova.js"></script>

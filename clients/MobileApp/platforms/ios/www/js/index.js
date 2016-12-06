@@ -20,7 +20,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+var myLat = 43.43882627349054;
+var myLng = -80.46858397521021;
+
+function simulatePosition(lat, lng){
+    myLat = lat;
+    myLng = lng;
+}
+
 $.request.host = "http://ben.local:2000/";
+//$.request.host = "http://localhost:2000/";
 var app = {
     // Application Constructor
     initialize: function() {
@@ -28,27 +37,37 @@ var app = {
     },
 
     onDeviceReady: function() {
+        $("#beacon").slideToggle(0);
         $("#loginButton").click(function(){
             facebookConnectPlugin.login(["public_profile"], function(data){
-//                {
-//    status: "connected",
-//    authResponse: {
-//        session_key: true,
-//        accessToken: "<long string>",
-//        expiresIn: 5183979,
-//        sig: "...",
-//        secret: "...",
-//        userID: "634565435"
-//    }
-//}
                 
-                alert("Done!");
+                //
+                // Data Structure:
+                //
+                //{
+                //    status: "connected",
+                //    authResponse: {
+                //        session_key: true,
+                //        accessToken: "<long string>",
+                //        expiresIn: 5183979,
+                //        sig: "...",
+                //        secret: "...",
+                //        userID: "634565435"
+                //    }
+                //}
                 $.request("POST","/token",{
-                    accessToken:data.authResponse.accessToken
-                }).done(function(){
+                    accessToken: data.authResponse.accessToken
+                }).done(function(token){
+                    $.request.token = token.token;
                     
+                    $("#loginScreen").fadeToggle("fast",function(){
+                        $("#mapScreen").fadeToggle("fast",function(){
+                            renderMapScreen();
+                        });
+
+                    }); 
                 }).fail(function(){
-                    
+                    alert("Facebook login failed");
                 })
             }, function(){
                alert("Facebook Connect Failed");
@@ -62,23 +81,25 @@ function renderMapScreen(){
         // [ Create the map ]
         var map = new google.maps.Map(document.getElementById('map'), {
             center: { lat: 43.440494, lng: -80.476204 },
-            zoom: 9
+            zoom: 12,
+            disableDefaultUI: true
         });       
         
         map.addListener('click', function() {
             if($("#beacon").is(":visible")){
-                $('#beacon').animate({ width: 'toggle' },animationDuration,function(){
-                    $('#beacons').animate({ width: 'toggle' },animationDuration);
-                });                  
+                $("#beacon").slideToggle();
+                $("#markDone").stop().animate({ right:"-100px" },"fast");
             }
   
         });
 
+        var selectedBeacon = null;
         var markers = [];
         var once = false;
         // var socket = io("http://ec2-54-88-176-255.compute-1.amazonaws.com:3000/", { reconnect:true });
-        var socket = io("http://localhost:4000/", { reconnect:true });
-
+//        var socket = io("http://localhost:4000/", { reconnect:true });
+        var socket = io("http://ben.local:4000/mobile", { reconnect:true });
+    
         var placedBeacons = [];
         socket.on("beacons",function(beacons){
 
@@ -159,29 +180,27 @@ function renderMapScreen(){
                     });
                     
                     marker.addListener('click', function() {
-//                        selectedBeacon = null;
-//                        
-//                        // [ Get beacon ]
-//                        for(var i = 0; i < placedBeacons.length; i++){
-//                            if(placedBeacons[i].marker == marker){
-//                                selectedBeacon = placedBeacons[i].beacon;
-//                                break;
-//                            }
-//                        }
-//                        
-//                        updateBeaconDetails();
-//
-//                        if($("#beacons").is(":visible")){
-//                            $('#beacons').animate({ width: 'toggle' },animationDuration,function(){
-//                                $('#beacon').animate({ width: 'toggle' },animationDuration);
-//                            });                            
-//                        }else{
-//
-//                        }  
-//                        
-//                        // [ Zoom to Pin ]
-//                        map.setZoom(17);
-//                        map.panTo(marker.position);
+                        $("#markDone").html("Mark Delivery <br/> as Finished");
+                        
+                        if(!$("#beacon").is(":visible")){
+                            $("#beacon").slideToggle();
+                            $("#markDone").stop().css("right","-100px").animate({ right:"25px" },"fast");
+                        }
+                        selectedBeacon = null;
+                        
+                        // [ Get beacon ]
+                        for(var i = 0; i < placedBeacons.length; i++){
+                            if(placedBeacons[i].marker == marker){
+                                selectedBeacon = placedBeacons[i].beacon;
+                                break;
+                            }
+                        }
+                        
+                        updateBeaconDetails();
+                      
+                        // [ Zoom to Pin ]
+                        map.setZoom(17);
+                        map.panTo(marker.position);
                     });
                     
                     // [ Add to list of placed beacons ]
@@ -220,6 +239,45 @@ function renderMapScreen(){
             })
         }
     
+        function updateBeaconDetails(){
+            var beacon = selectedBeacon;
+
+            // [ Update Beacon Details ]
+            $("#beacon").find(".signal").show();
+            if(!beacon.water) $("#beacon .water").hide();
+            if(!beacon.food) $("#beacon .food").hide();
+            if(!beacon.clothing) $("#beacon .clothing").hide();
+            if(!beacon.emergency) $("#beacon .emergency").hide();
+            
+            
+            $("#beacon .waterSince").attr("data-date",beacon.water_since);
+            $("#beacon .foodSince").attr("data-date",beacon.food_since);
+            $("#beacon .clothingSince").attr("data-date",beacon.clothing_since);
+            updateDates();
+            
+
+//            $("#beacon .lat").text(beacon.lat);
+//            $("#beacon .lng").text(beacon.lng);   
+//            
+//            // If place hasn't been found in 500ms, tell user it's looking
+//            // Waiting 500ms avoids "Looking..." flashing over and over
+//            var timeout = setTimeout(function(){
+//                $("#beacon .address").text("Looking...");
+//            },500);
+//            
+//            geocodeLatLng(beacon.lat,beacon.lng,function(address,unknown){
+//                // Clear looking... timeout so looking... isn't displayed since it's not looking anymore
+//                clearTimeout(timeout);
+//                
+//                // [ Update address unless user clicked a different beacon since geocoding started ]
+//                if(selectedBeacon){
+//                    if(beacon.id == selectedBeacon.id){
+//                         $("#beacon .address").text(address);
+//                    }                    
+//                }
+//            });          
+        }
+        
         
         var geoCodeCache = [];
         function geocodeLatLng(lat, lng, callback) {
@@ -309,6 +367,70 @@ function renderMapScreen(){
                 }
             });
         }
+    
+        (function deliveryEvents(){
+            $("#markDone").click(function(){
+                 
+                $.request("POST","/deliveries",{
+                    beaconId: selectedBeacon.id
+                }).done(function(){
+                    $("#markDone").html("Delivered <i class='fa fa-check'></i>");
+                })
+                .fail(function(){
+                    alert("Failed to mark as delivered")
+                })
+            });
+        })();
+    
+        (function gpsEvents(){
+            // Beacon hasn't been placed yet
+            var marker = new google.maps.Marker({
+                position: {
+                     lat:myLat
+                    ,lng:myLng
+                },
+                icon:{
+                     url:"img/pins/me.png"
+                    ,scaledSize:new google.maps.Size(25,25)
+//                    ,origin:new google.maps.Point(12.5,12.5)
+                },
+                zIndex:9999,
+                clickable:false,
+
+                map: map
+            });
+
+            // [ Send my GPS coordinates every so often ]
+            setInterval(function(){
+                marker.setPosition( new google.maps.LatLng( myLat, myLng ) );
+                
+                socket.emit("movement",{
+                     "lat":myLat
+                    ,"lng":myLng
+                    ,"type":"mobile"
+                    ,"token":$.request.token
+                });
+            },1000);        
+        })();
+    
+        (function userInfoEvents(){
+            $("#profileButton").click(function(){
+                $.request("GET","/me").done(function(user){
+                    $("#darkOverlay").fadeToggle("fast");
+                    $("#profileInfo").animate({ "top":"30%" },"fast");
+                    $("#profileInfo").find(".name").text(user.firstName + " " + user.lastName);
+                    $("#profileInfo").find(".deliveries").text(user.deliveries);
+                }).fail(function(){
+                    alert("Failed to get user info");
+                });
+                
+            });
+            
+            $("#darkOverlay").click(function(){
+                $("#darkOverlay").fadeToggle("fast");
+                $("#profileInfo").animate({ "top":"-30%" },"fast");
+            });
+        })();
     }
 
 

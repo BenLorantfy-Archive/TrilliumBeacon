@@ -19,6 +19,7 @@ html,body{
 table{
     border-collapse: collapse;
     border-spacing: 0;
+    display: block;
 }
 
 ::-webkit-input-placeholder{
@@ -329,4 +330,33 @@ input[type="button"],button{
 .sideBarHeader{
     font-size:18px;
     margin-top:0;
+}
+
+.dialog{
+    background-color:white;
+    padding:20px;
+    border-radius: 20px;
+}
+
+.dialog input[type="text"]{
+    background-color:rgba(100,100,100,0.4);
+}
+
+.dialog .dialogButton{
+    background-color:green;
+    color:white;
+    padding:10px;
+    border-radius: 6px;
+    margin-left:auto;
+    margin-right:auto;
+    display: inline-block;
+}
+
+#newBeacon{
+    display: inline-block;
+    margin-left:5px;
+    padding:5px;
+    background-color:grey;
+    color:white;
+    border-radius: 6px;
 }

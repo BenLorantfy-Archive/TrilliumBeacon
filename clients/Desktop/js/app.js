@@ -14,7 +14,8 @@ app.controller('MainController', function($scope, $compile) {
         // [ Create the map ]
         var map = new google.maps.Map(document.getElementById('map'), {
             center: { lat: 43.440494, lng: -80.476204 },
-            zoom: 12
+            zoom: 12,
+            disableDefaultUI: true
         });       
         
         map.addListener('click', function() {
@@ -29,7 +30,7 @@ app.controller('MainController', function($scope, $compile) {
         var markers = [];
         var once = false;
         // var socket = io("http://ec2-54-88-176-255.compute-1.amazonaws.com:3000/", { reconnect:true });
-        var socket = io("http://localhost:4000/", { reconnect:true });
+        var socket = io("http://localhost:4000/admins", { reconnect:true });
 
         var placedBeacons = [];
         socket.on("beacons",function(beacons){
@@ -207,6 +208,12 @@ app.controller('MainController', function($scope, $compile) {
             $("#beacon .lat").text(beacon.lat);
             $("#beacon .lng").text(beacon.lng);   
             
+            $("#beaconId").text(beacon.external_number);
+  
+            
+            $("#beacon .first").text(beacon.registered_to_first_name);
+            $("#beacon .last").text(beacon.registered_to_last_name);   
+            
             // If place hasn't been found in 500ms, tell user it's looking
             // Waiting 500ms avoids "Looking..." flashing over and over
             var timeout = setTimeout(function(){
@@ -315,6 +322,40 @@ app.controller('MainController', function($scope, $compile) {
             });
         }
     }
+    
+    (function beaconEvents(){
+        $('#newBeaconPopup').popup();
+        
+        $("#newBeacon").click(function(){
+            $("#newBeaconPopup .createUI input").val("");
+            $("#newBeaconPopup .createUI").show();
+            $("#newBeaconPopup .resultsUI").hide();
+            $('#newBeaconPopup').popup('show');
+        });
+        
+        $("#createNewBeacon").click(function(){
+            var beaconNumber = $("#newBeaconPopup .beaconNumber").val();
+            var firstName = $("#newBeaconPopup .firstName").val();
+            var lastName = $("#newBeaconPopup .lastName").val();
+            
+            $.request("POST","/beacons",{
+                 beaconNumber:beaconNumber
+                ,firstName:firstName
+                ,lastName:lastName
+            }).done(function(data){
+                $("#newBeaconPopup .createUI").hide();
+                $("#newBeaconPopup .resultsUI").show();
+                $("#newBeaconPopup .resultsUI .beaconID").text(data.id);
+                $("#newBeaconPopup .resultsUI .beaconKey").text(data.key);
+            }).fail(function(){
+                alert("Failed to create beacon");
+            })
+        });
+        
+        $("#beaconOkButton").click(function(){
+            $('#newBeaconPopup').popup('hide');
+        })
+    })();
 
     (function loginEvents(){
         
@@ -327,16 +368,31 @@ app.controller('MainController', function($scope, $compile) {
         });
         
         $("#signup").click(function(){
-
-            $("#loginScreen").fadeToggle("fast",function(){
-                $("#mapScreen").fadeToggle("fast");
-            });
-
-            setTimeout(function(){
-                renderMapScreen();
-            },200);
+            var email = $("#email").val();
+            var password = $("#password").val();
+            var confirmPassword = $("#confirmPassword").val();
+            var displayName = $("#displayName").val();
+            var invitationCode = $("#invitationCode").val();
             
-            expandWindow();
+            $.request("POST","/token",{
+                 email:email
+                ,password:password
+                ,confirmPassword:confirmPassword
+                ,displayName:displayName
+                ,invitationCode:invitationCode
+                ,signup:true
+            }).done(function(token){
+                $.request.token = token.token;
+                
+                $("#loginScreen").fadeToggle("fast",function(){
+                    $("#mapScreen").fadeToggle("fast");
+                    renderMapScreen();
+                });
+
+                expandWindow();                
+            }).fail(function(data){
+                alert(data.message);
+            });
         })
         
         // [ Login user ]
@@ -347,14 +403,19 @@ app.controller('MainController', function($scope, $compile) {
             $.request("POST","/token",{
                  email:email
                 ,password:password
-            }).done(function(){
+            }).done(function(token){
+                $.request.token = token.token;
+                
                 $("#loginScreen").fadeToggle("fast",function(){
                     $("#mapScreen").fadeToggle("fast");
                     renderMapScreen();
-                });
+                })
 
-                expandWindow();                
-            })
+                expandWindow();    
+                
+            }).fail(function(data){
+                alert(data.message);
+            });
             
 
         });      

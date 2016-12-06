@@ -18,7 +18,7 @@
             <input id="password" type="password" placeholder="Password" />
             <div class="extraFieldContainer">
                 <input id="confirmPassword" type="password" placeholder="Confirm Password" />     
-                <input id="cityPassword" type="password" placeholder="Invitation Code" />
+                <input id="invitationCode" type="password" placeholder="Invitation Code" />
             </div>
             <div id="signupUI">
                 <input type="button" value="Sign Up" id="signup" />
@@ -70,12 +70,43 @@
             </div>
             <div id="beacons">
                 <div class="sidebarContainer">
-                    <div id="beaconHeader" class="detailsHeader sideBarHeader">Beacons</div>
+                    <div id="beaconHeader" class="detailsHeader sideBarHeader">Beacons <div id="newBeacon">Add Beacon</div></div>
                 </div>
             </div>
             <div id="map"></div>
 
-        
+            <div id="newBeaconPopup" class="dialog">
+                <div class="createUI">
+                    <table>
+                        <tr>
+                            <td>Beacon Number</td>
+                            <td><input class="beaconNumber" type="text" /></td>
+                        </tr>
+                        <tr>
+                            <td>First Name</td>
+                            <td><input class="firstName" type="text" placeholder="Optional" /></td>
+                        </tr>
+                        <tr>
+                            <td>Last Name</td>
+                            <td><input class="lastName" type="text" placeholder="Optional" /></td>
+                        </tr>
+                    </table>
+                    <div class="dialogButton" id="createNewBeacon">Create</div>                
+                </div>
+                <div class="resultsUI">
+                    <table>
+                        <tr>
+                            <td>ID</td>
+                            <td class="beaconID"></td>
+                        </tr>
+                        <tr>
+                            <td>Key</td>
+                            <td class="beaconKey"></td>
+                        </tr>
+                    </table>
+                    <div class="dialogButton" id="beaconOkButton">Ok, I've saved these somewhere safe</div>
+                </div>
+            </div>
         </section>
     </body>
 
@@ -88,6 +119,7 @@
     <script src="js/lib/request.js"></script>
     <script src="js/lib/contextmenu.js"></script>
     <script src="js/lib/angular.js"></script>  
+    <script src="js/lib/jquery.popupoverlay.js"></script>
     <script src="js/app.js"></script>
     <script>if (window.module) module = window.module;</script>
 </html>
