@@ -6,7 +6,7 @@
       
     <!-- CSS -->
     <link rel="stylesheet" type="text/css" href="css/theme.css" />
-    <link rel="stylesheet" type="text/css" href="css/lib/contextmenu.css" />
+    <link rel="stylesheet" type="text/css" href="css/lib/font-awesome-4.7.0/css/font-awesome.min.css" />
   </head>
     <body ng-app="app" ng-controller="MainController">
         <section id="loginScreen">
@@ -31,7 +31,7 @@
         <section id="mapScreen" style="display:none">      
             <div id="beacon">
                 <div class="sidebarContainer">
-                    <div id="beaconHeader" class="detailsHeader sideBarHeader">Beacon <span id="beaconId">123</span></div>
+                    <div id="beaconHeader" class="detailsHeader sideBarHeader">Beacon <span id="beaconId">123</span> <div id="deleteBeacon">Delete Beacon</div></div>
                     <div id="signalingHeader" class="detailsHeader">Position</div>
                     <table cellspacing="0">
                         <tr>
@@ -58,11 +58,11 @@
                     <table cellspacing="0">
                         <tr>
                             <td class="detailsLabel">First:</td>
-                            <td><div class="first">Ben</div></td>
+                            <td><div class="first"></div></td>
                         </tr>
                         <tr>
                             <td class="detailsLabel">Last:</td>
-                            <td><div class="last">Lorantfy</div></td>                       
+                            <td><div class="last"></div></td>                       
                         </tr>
                     </table>  
                 </div>
@@ -74,9 +74,10 @@
                 </div>
             </div>
             <div id="map"></div>
-
+            <div id="invitations"><i class="fa fa-envelope"></i></div>
             <div id="newBeaconPopup" class="dialog">
                 <div class="createUI">
+                    <div class="header">Create Beacon</div>
                     <table>
                         <tr>
                             <td>Beacon Number</td>
@@ -94,6 +95,7 @@
                     <div class="dialogButton" id="createNewBeacon">Create</div>                
                 </div>
                 <div class="resultsUI">
+                    <div class="header">Beacon Credentials</div>
                     <table>
                         <tr>
                             <td>ID</td>
@@ -107,6 +109,26 @@
                     <div class="dialogButton" id="beaconOkButton">Ok, I've saved these somewhere safe</div>
                 </div>
             </div>
+            
+            <div id="newInvitationPopup" class="dialog">
+                <div class="createUI">
+                    <div class="header">Create Invitation</div>
+                    <div class="instructions">
+                        Invitations are how you add other admin users. Administrative users can only join with an invitation. To create an invitation and get an invite code, click the button below.
+                    </div>
+                    <div class="dialogButton" id="createNewInvitation">Create</div>                
+                </div>
+                <div class="resultsUI">
+                    <div class="header">Invitation Code</div>
+                    <div class="instructions">
+                        Share the code below with the person you want to invite. Be aware that it will expire in 2 days from now.
+                    </div>
+                    
+                    <div class="invitationCode"></div>
+                    
+                    <div class="dialogButton" id="invitationOkButton">Ok, I've saved this somewhere safe</div>
+                </div>
+            </div>
         </section>
     </body>
 
@@ -117,7 +139,6 @@
     <script src="js/lib/moment.js"></script>    
     <script src="js/lib/jquery.js"></script>    
     <script src="js/lib/request.js"></script>
-    <script src="js/lib/contextmenu.js"></script>
     <script src="js/lib/angular.js"></script>  
     <script src="js/lib/jquery.popupoverlay.js"></script>
     <script src="js/app.js"></script>

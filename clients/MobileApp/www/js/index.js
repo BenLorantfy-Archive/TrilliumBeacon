@@ -221,6 +221,35 @@ function renderMapScreen(){
                 
                 
             })
+        
+            // [ Remove any old markers and beacons ]
+            for(var i = placedBeacons.length - 1; i >= 0; i--){
+                var placedBeacon = placedBeacons[i];
+                var found = false;
+                
+                // Search for beacon in new beacons
+                for(var j = 0; j < beacons.length; j++){
+                    if(placedBeacon.beacon.id == beacons[j].id){
+                        found = true;
+                        break;
+                    }
+                }
+                
+                if(!found){
+                    placedBeacon.marker.setMap(null);
+                    if(selectedBeacon){
+                        if(selectedBeacon.id == placedBeacon.beacon.id){
+                            selectedBeacon = null;
+                            if($("#beacon").is(":visible")){
+                                $("#beacon").slideToggle();
+                                $("#markDone").stop().animate({ right:"-100px" },"fast");
+                            }
+                        }
+                    }
+                    
+                    placedBeacons.splice(i,1);
+                }
+            }        
         })
         
         setInterval(function(){

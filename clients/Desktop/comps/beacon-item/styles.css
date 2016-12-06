@@ -1,5 +1,30 @@
 .beacon{
 /*    padding:10px;*/
-    margin-bottom: 10px;
+    margin-top: 5px;
     
+}
+
+.beacon{
+    border:1px solid lightgrey;
+    border-radius:10px;
+    padding:10px;
+    font-size: 14px;
+}
+
+.beacon .beaconNumber::before{
+    content:"Number: ";
+    font-weight: 500;
+    font-size: 12px;
+}
+
+.beacon .lat::before{
+    content:"Lat: ";
+    font-weight: 500;
+    font-size: 12px;
+}
+
+.beacon .lng::before{
+    content:"Lng: ";
+    font-weight: 500;
+    font-size: 12px;
 }

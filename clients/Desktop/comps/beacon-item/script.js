@@ -7,6 +7,7 @@
             scope: {
                  "lat": '@'
                 ,"lng": '@'
+                ,"number": '@'
             },
             templateUrl: 'comps/' + hyphenCase + '/markup.html',
         };

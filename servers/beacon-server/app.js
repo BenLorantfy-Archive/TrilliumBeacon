@@ -114,6 +114,7 @@ io.of("/mobile").on('connection', function(socket){
             "food_since",
             "clothing_since"
         )
+        .where("deleted",0)
         .where(function(){
             this.where("water",1).orWhere("food",1).orWhere("clothing",1);
         })
@@ -158,9 +159,12 @@ io.of("/admins").on('connection', function(socket){
       "registered_to_first_name",
       "registered_to_last_name",
       "external_number"
-  ).from("Beacon").then(function(rows){
-    io.of("/admins").emit("beacons",rows)
-    setTimeout(function(){ send(io); },1000);
-  });
+  )
+      .from("Beacon")
+    .where("deleted",0)
+      .then(function(rows){
+        io.of("/admins").emit("beacons",rows)
+        setTimeout(function(){ send(io); },1000);
+      });
 
 })(io);

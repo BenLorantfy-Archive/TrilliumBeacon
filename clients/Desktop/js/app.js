@@ -86,6 +86,7 @@ app.controller('MainController', function($scope, $compile) {
                     var el = $("#" + beacon.id);
                     el.attr("lat",beacon.lat).find(".lat").text(beacon.lat);
                     el.attr("lng",beacon.lng).find(".lng").text(beacon.lng);
+                    el.attr("number",beacon.external_number).find(".number").text(beacon.lng);
                     
                     var oldIcon = marker.getIcon();
                     if(oldIcon.url.replace("-highlighted","") != icon){
@@ -164,12 +165,44 @@ app.controller('MainController', function($scope, $compile) {
                     $("#beacons").children().append(el);
                     el.attr("lat",beacon.lat);
                     el.attr("lng",beacon.lng);
+                    el.attr("number",beacon.external_number);
                     $compile(el)($scope);
                 }
                 
                 
                 
             })
+        
+            // [ Remove any old markers and beacons ]
+            for(var i = placedBeacons.length - 1; i >= 0; i--){
+                var placedBeacon = placedBeacons[i];
+                var found = false;
+                
+                // Search for beacon in new beacons
+                for(var j = 0; j < beacons.length; j++){
+                    if(placedBeacon.beacon.id == beacons[j].id){
+                        found = true;
+                        break;
+                    }
+                }
+                
+                if(!found){
+                    $("#" + placedBeacon.beacon.id).remove();
+                    placedBeacon.marker.setMap(null);
+                    if(selectedBeacon){
+                        if(selectedBeacon.id == placedBeacon.beacon.id){
+                            selectedBeacon = null;
+                            if($("#beacon").is(":visible")){
+                                $('#beacon').animate({ width: 'toggle' },animationDuration,function(){
+                                    $('#beacons').animate({ width: 'toggle' },animationDuration);
+                                });                  
+                            }
+                        }
+                    }
+                    
+                    placedBeacons.splice(i,1);
+                }
+            }
         })
         
         setInterval(function(){
@@ -189,6 +222,8 @@ app.controller('MainController', function($scope, $compile) {
         }
     
         function updateBeaconDetails(){
+            if(selectedBeacon == null) return;
+            
             var beacon = selectedBeacon;
 
             // [ Update Beacon Details ]
@@ -447,6 +482,39 @@ app.controller('MainController', function($scope, $compile) {
         }
     })();
  
+    (function invitationEvents(){
+        $("#newInvitationPopup").popup();
+        
+        $("#invitations").click(function(){
+            $("#newInvitationPopup .resultsUI").hide();
+            $("#newInvitationPopup .createUI").show();
+            $("#newInvitationPopup").popup("show");
+        })
+        
+        $("#invitationOkButton").click(function(){
+            $("#newInvitationPopup").popup("hide");
+        });
+        
+        $("#createNewInvitation").click(function(){
+            $.request("POST","/invitations").done(function(data){
+                $("#newInvitationPopup .resultsUI").show();
+                $("#newInvitationPopup .createUI").hide(); 
+                $("#newInvitationPopup .invitationCode").text(data.code);
+            }).fail(function(data){
+                alert("Failed to create invitation code");
+            })
+        });
+    })();
+    
+    (function deleteEvents(){
+        $("#deleteBeacon").click(function(){
+            $.request("DELETE","/beacons/" + selectedBeacon.id).done(function(){
+                alert("Beacon Deleted Successfully");
+            }).fail(function(){
+                alert("Failed to delete beacon");
+            })
+        })
+    })();
 });
 
 // [ Async load all the components ]

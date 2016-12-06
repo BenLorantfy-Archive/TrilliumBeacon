@@ -124,6 +124,38 @@ app.use (function(req, res, next) {
     
 });
 
+app.post("/invitations",function(req,res){
+    var code = "";
+    
+    for(var i = 0; i < 9; i++){
+        code += String.fromCharCode(getRandomInt(33,126));
+    }
+    
+    function getRandomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    var now = new Date();
+    var expires = new Date();
+    expires.setDate(expires.getDate() + 2);
+    
+    db("Invitation")
+        .insert({
+             "code":code
+            ,"date_created":now.toISOString()
+            ,"city_id":req.user.cityId
+            ,"date_expires":expires.toISOString()
+        })
+        .then(function(){
+            res.json({
+                code:code
+            })
+        })
+        .catch(function(){
+            res.end(error("Failed to create invitation due to SQL error"));
+        });
+});
+
 app.post("/beacons",function(req,res){
     var data = req.body;
     
@@ -155,6 +187,13 @@ app.post("/beacons",function(req,res){
                  id:longId
                 ,key:key
             })
+        })
+        .catch(function(err){
+            if(err.errno == errors.DUPLICATE_KEY){
+                res.end(error("Beacon with that number already exists", errors.USER_ALREADY_EXISTS));
+            }else{
+                res.end(error("Failed to update beacon because of SQL error: " + e));
+            }        
         });
 });
 
@@ -235,29 +274,44 @@ app.post("/token",function(req,res){
             .where("code",data.invitationCode)
             .then(function(rows){
                 if(rows.length > 0){
-                    console.log(rows[0]);
                     
-                    // [ Insert new user ]
-                    db("AdminUser")
-                        .insert({
-                             email:data.email
-                            ,password_hash:hash
-                            ,date_created:(new Date()).toISOString()
-                            ,city_id:rows[0].city_id
-                            ,invitation_id:rows[0].id
-                            ,display_name:data.displayName
+                    db("Invitation")
+                        .update({
+                             "used": 1
+                            ,"date_used": (new Date()).toISOString()
                         })
+                        .where("id", rows[0].id)
                         .then(function(){
-                            // [ Now authenticate after user has been created ]
-                            authenticate();
+                        
+                            // [ Insert new user ]
+                            db("AdminUser")
+                                .insert({
+                                     email:data.email
+                                    ,password_hash:hash
+                                    ,date_created:(new Date()).toISOString()
+                                    ,city_id:rows[0].city_id
+                                    ,invitation_id:rows[0].id
+                                    ,display_name:data.displayName
+                                })
+                                .then(function(){
+                                    // [ Now authenticate after user has been created ]
+                                    authenticate();
+                                })
+                                .catch(function(err){
+                                    if(err.errno == errors.DUPLICATE_KEY){
+                                        res.end(error("User already exists", errors.USER_ALREADY_EXISTS));
+                                    }else{
+                                        res.end(error("Failed to create admin user due to SQL error: " + err));
+                                    }
+                                });  
+                        
                         })
-                        .catch(function(err){
-                            if(err.errno == errors.DUPLICATE_KEY){
-                                res.end(error("User already exists", errors.USER_ALREADY_EXISTS));
-                            }else{
-                                res.end(error("Failed to create admin user due to SQL error: " + err));
-                            }
-                        });         
+                        .catch(function(){
+                            res.end(error("Failed to use invitaiton code due to SQL error:" + e));
+                        });
+                        
+                    
+                           
                 }else{
                     // Invitation code was invalid
                     res.end(error("Invalid invitation code"));
@@ -275,6 +329,112 @@ app.post("/token",function(req,res){
         // [ If user doesn't want to sign up, skip to authentication step ]
         authenticate();
     }
+});
+
+app.post("/beacons/:id/number",function(req,res){
+    var id = req.params.id;
+
+    var data = req.body;
+    
+    // [ Make sure body is present ]
+    if(!req.body) return res.end(error("Missing json body", errors.MISSING_BODY));   
+    
+    // [ Make fields are present and valid ]
+    if(!data.number) return res.end(error("Missing Beacon Number", errors.MISSING_FIELD));
+    if(typeof data.number !== "string") return res.end(error("Beacon Number must be a string", errors.MISSING_FIELD));
+    
+    db("Beacon")
+        .update({
+             "external_number": data.number
+        })
+        .where("long_id", id)
+        .then(function(){
+            res.json({
+                success:true
+            });
+        })
+        .catch(function(err){
+            if(err.errno == errors.DUPLICATE_KEY){
+                res.end(error("Beacon with that number already exists", errors.USER_ALREADY_EXISTS));
+            }else{
+                res.end(error("Failed to update beacon because of SQL error: " + err));
+            }
+                                        
+            
+        });    
+});
+
+app.post("/beacons/:id/first-name",function(req,res){
+    var id = req.params.id;
+
+    var data = req.body;
+    
+    // [ Make sure body is present ]
+    if(!req.body) return res.end(error("Missing json body", errors.MISSING_BODY));   
+    
+    // [ Make fields are present and valid ]
+    if(!data.firstName) return res.end(error("Missing First Name", errors.MISSING_FIELD));
+    if(typeof data.firstName !== "string") return res.end(error("First name must be a string", errors.MISSING_FIELD));
+    
+    db("Beacon")
+        .update({
+             "registered_to_first_name": data.firstName
+        })
+        .where("long_id", id)
+        .then(function(){
+            res.json({
+                success:true
+            });
+        })
+        .catch(function(e){
+            res.end(error("Failed to update beacon because of SQL error: " + e));
+        });    
+});
+
+app.post("/beacons/:id/last-name",function(req,res){
+    var id = req.params.id;
+
+    var data = req.body;
+    
+    // [ Make sure body is present ]
+    if(!req.body) return res.end(error("Missing json body", errors.MISSING_BODY));   
+    
+    // [ Make fields are present and valid ]
+    if(!data.lastName) return res.end(error("Missing Last Name", errors.MISSING_FIELD));
+    if(typeof data.lastName !== "string") return res.end(error("Last name must be a string", errors.MISSING_FIELD));
+    
+    db("Beacon")
+        .update({
+             "registered_to_last_name": data.lastName
+        })
+        .where("long_id", id)
+        .then(function(){
+            res.json({
+                success:true
+            });
+        })
+        .catch(function(e){
+            res.end(error("Failed to update beacon because of SQL error: " + e));
+        });    
+});
+
+app.delete("/beacons/:id",function(req,res){
+    var id = req.params.id;
+    db("Beacon")
+        .update({
+             "deleted": 1
+            ,"date_deleted":(new Date()).toISOString()
+        })
+        .where("long_id", id)
+        .then(function(){
+            res.json({
+                success:true
+            });
+        })
+        .catch(function(e){
+            res.end(error("Failed to update beacon because of SQL error: " + e));
+        });
+    
 });
 
 app.listen(3000);
